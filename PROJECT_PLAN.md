@@ -1,95 +1,137 @@
-# Flutter + Supabase アカウントテンプレート
+# エスプレッソレシピ記録アプリ実装計画
 
-## プロジェクトのゴールと目的
+## 概要
 
-### ゴール
-今後のアプリ開発で再利用可能な、完全な認証機能を備えたFlutterテンプレートを作成する。新しいプロジェクトを始める際に、このテンプレートをクローンするだけで、認証機能がすぐに使える状態にする。
+コーヒーグループを作成し、メンバー間でエスプレッソレシピを共有・記録するアプリ。Supabase をバックエンドとして使用。
 
-### 目的
-- **開発時間の短縮**: 新規アプリ開発時に認証機能を毎回実装する手間を省く
-- **ベストプラクティスの確立**: Supabase + Riverpodを使った標準的な実装パターンを確立
-- **簡単なセットアップ**: 環境変数を設定するだけで動作するよう、明確な手順を提供
-- **拡張性**: 新しい機能を追加しやすい構造を維持
+## データベース設計（Supabase）
 
-### 提供する機能
-- メールアドレス認証（サインアップ、ログイン、パスワードリセット）
-- 自動セッション管理
-- Material 3ベースの美しいUI
+### テーブル構成
 
-## 実装内容
+1. **coffee_groups** テーブル
 
-### 1. プロジェクトのセットアップ
-- Flutterプロジェクトの初期化
-- 必要なパッケージの追加：
-  - `supabase_flutter`: Supabase連携
-  - `flutter_riverpod`: 状態管理
-  - `go_router`: ルーティング
-  - `flutter_dotenv`: 環境変数管理
+   - id (uuid, primary key)
+   - name (text, not null) - グループ名
+   - owner_id (uuid, foreign key → auth.users) - 作成者 ID
+   - created_at (timestamp)
+   - updated_at (timestamp)
 
-### 2. プロジェクト構造の構築
-```
-lib/
-├── main.dart
-├── config/
-│   ├── supabase_config.dart        # Supabase初期化
-│   └── router.dart                 # ルーティング設定
-├── features/
-│   └── auth/
-│       ├── providers/
-│       │   └── auth_provider.dart   # 認証状態管理
-│       ├── services/
-│       │   └── auth_service.dart    # 認証ロジック
-│       └── screens/
-│           ├── login_screen.dart
-│           ├── signup_screen.dart
-│           ├── forgot_password_screen.dart
-│           └── home_screen.dart
-└── core/
-    └── constants/
-        └── env.dart                 # 環境変数アクセス
-```
+2. **group_members** テーブル
 
-### 3. 認証機能の実装
-- **メール認証**:
-  - サインアップ（メール確認付き）
-  - ログイン
-  - パスワードリセット（メール送信）
-- **セッション管理**: 自動ログイン状態の維持
+   - id (uuid, primary key)
+   - group_id (uuid, foreign key → coffee_groups)
+   - user_id (uuid, foreign key → auth.users)
+   - role (text) - 'owner' or 'member'
+   - joined_at (timestamp)
+   - ユニーク制約: (group_id, user_id)
 
-### 4. UI実装（Material 3デザイン）
-- ログイン画面（メール/パスワード）
-- サインアップ画面
-- パスワードリセット画面
-- ホーム画面（ログイン後のサンプル）
-- レスポンシブデザイン
+3. **group_invitations** テーブル
 
-### 5. 環境変数設定ファイルの作成
-- `.env.example`: サンプル環境変数ファイル
-- `lib/config/env_config.dart`: 環境変数を読み込むヘルパー
+   - id (uuid, primary key)
+   - group_id (uuid, foreign key → coffee_groups)
+   - invite_code (text, unique) - 招待リンク用のコード
+   - created_by (uuid, foreign key → auth.users)
+   - expires_at (timestamp, optional)
+   - created_at (timestamp)
 
-### 6. セットアップドキュメントの作成
-詳細なREADME.mdを作成：
-- **Supabaseの設定手順**:
-  1. プロジェクト作成
-  2. API URLとAnon Keyの取得
-  3. Email Authの有効化
-  4. メールテンプレートの設定（任意）
-- **プロジェクトのセットアップ手順**:
-  1. リポジトリのクローン
-  2. `.env`ファイルの作成と設定
-  3. `flutter pub get`
-  4. 実行
+4. **espresso_recipes** テーブル
+   - id (uuid, primary key)
+   - group_id (uuid, foreign key → coffee_groups)
+   - created_by (uuid, foreign key → auth.users)
+   - coffee_weight (numeric, not null) - g 数
+   - grinder_setting (text, not null) - グラインダーセッテイング（3 桁の数字）
+   - extraction_time (integer, optional) - 抽出時間（秒）
+   - roast_level (numeric, optional) - 焙煎度（0.0-1.0）
+   - rating (integer, not null) - 結果評価（1-5）
+   - photo_url (text, optional) - 写真の URL
+   - created_at (timestamp, not null) - 自動記録
+   - updated_at (timestamp)
 
-### 7. サンプルコードとコメント
-- 各ファイルに詳細なコメントを追加
-- ユーザーがカスタマイズしやすいように設計
+## 実装ファイル構成
+
+### 新規作成ファイル
+
+1. **lib/features/groups/**
+
+   - `models/coffee_group.dart` - グループモデル
+   - `models/group_member.dart` - メンバーモデル
+   - `models/group_invitation.dart` - 招待モデル
+   - `services/group_service.dart` - グループ CRUD 操作
+   - `services/invitation_service.dart` - 招待リンク生成・参加処理
+   - `providers/group_provider.dart` - Riverpod プロバイダー
+   - `screens/groups_list_screen.dart` - グループ一覧画面
+   - `screens/group_detail_screen.dart` - グループ詳細画面（レシピ一覧含む）
+   - `screens/create_group_screen.dart` - グループ作成画面
+   - `screens/join_group_screen.dart` - 招待リンクで参加する画面
+
+2. **lib/features/recipes/**
+
+   - `models/espresso_recipe.dart` - レシピモデル
+   - `services/recipe_service.dart` - レシピ CRUD 操作
+   - `services/storage_service.dart` - Supabase Storage 操作（写真アップロード）
+   - `providers/recipe_provider.dart` - Riverpod プロバイダー
+   - `screens/create_recipe_screen.dart` - レシピ作成画面
+   - `screens/edit_recipe_screen.dart` - レシピ編集画面
+   - `widgets/recipe_form.dart` - レシピ入力フォーム（共通ウィジェット）
+   - `widgets/recipe_list_item.dart` - レシピ一覧アイテム
+
+3. **lib/core/utils/**
+   - `image_picker_util.dart` - 画像選択ユーティリティ
+
+### 修正ファイル
+
+1. **lib/config/router.dart** - 新しいルートを追加
+2. **lib/features/auth/screens/home_screen.dart** - グループ一覧へのナビゲーション追加
+3. **pubspec.yaml** - 必要なパッケージ追加（image_picker 等）
+
+## 主要機能実装
+
+### 1. グループ機能
+
+- グループ作成（作成者が owner）
+- グループ一覧表示（ユーザーが参加しているグループ）
+- グループ詳細表示
+- グループ削除（owner のみ）
+
+### 2. 招待機能
+
+- 招待リンク生成（ランダムなコード生成）
+- 招待リンクでグループ参加
+- 招待リンクの共有（クリップボードにコピー）
+
+### 3. レシピ機能
+
+- レシピ作成（必須: g 数、グラインダーセッテイング、評価 / 任意: 抽出時間、焙煎度、写真）
+- レシピ一覧表示（グループ詳細内）
+- レシピ削除
+- 写真アップロード（Supabase Storage）
+
+### 4. UI/UX
+
+- グループ一覧 → グループ詳細（レシピ一覧） → レシピ作成/編集の画面遷移
+- スライダーで焙煎度入力（0-100%）
+- 5 段階評価（星表示）
+- 写真選択・プレビュー機能
+
+## 必要なパッケージ追加
+
+- `image_picker` - 写真選択
+- `uuid` - 招待コード生成
+- `share_plus` - 招待リンク共有（オプション）
+
+## Supabase 設定
+
+1. RLS（Row Level Security）ポリシー設定
+2. Storage バケット作成（`recipe-photos`）
+3. Storage ポリシー設定
 
 ## 実装タスク
 
-1. Flutterプロジェクトの初期化と必要なパッケージの追加
-2. 環境変数設定ファイルとヘルパークラスの作成
-3. Supabase初期化コードとルーティング設定の実装
-4. 認証サービス（メール認証のみ）とRiverpodプロバイダーの実装
-5. 認証画面（ログイン、サインアップ、パスワードリセット、ホーム）のUI実装
-6. 詳細なREADMEとセットアップガイドの作成
-
+1. pubspec.yaml に必要なパッケージ（image_picker, uuid 等）を追加
+2. グループ、メンバー、招待、レシピのモデルクラスを作成
+3. グループ、招待、レシピ、ストレージのサービスクラスを作成
+4. Riverpod プロバイダーを作成
+5. グループ一覧、詳細、作成、参加画面を作成
+6. レシピ作成、編集画面とフォームウィジェットを作成
+7. ルーターに新しい画面のルートを追加
+8. ホーム画面からグループ一覧へのナビゲーションを追加

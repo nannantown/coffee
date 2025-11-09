@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/auth_provider.dart';
 
 /// ホーム画面（ログイン後のサンプル画面）
@@ -124,9 +125,23 @@ class HomeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 24),
 
+              // グループ一覧へのボタン
+              FilledButton.icon(
+                onPressed: () => context.push('/groups'),
+                icon: const Icon(Icons.coffee),
+                label: const Text('コーヒーグループを見る'),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
               // 説明テキスト
               Text(
-                'このテンプレートをベースに、あなたのアプリを作成してください！',
+                'グループを作成して、エスプレッソレシピを共有しましょう！',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),

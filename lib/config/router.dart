@@ -5,6 +5,12 @@ import '../features/auth/screens/forgot_password_screen.dart';
 import '../features/auth/screens/home_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/signup_screen.dart';
+import '../features/groups/screens/groups_list_screen.dart';
+import '../features/groups/screens/group_detail_screen.dart';
+import '../features/groups/screens/create_group_screen.dart';
+import '../features/groups/screens/join_group_screen.dart';
+import '../features/recipes/screens/create_recipe_screen.dart';
+import '../features/recipes/screens/edit_recipe_screen.dart';
 
 /// アプリ全体のルーティング設定を提供するプロバイダー
 final routerProvider = Provider<GoRouter>((ref) {
@@ -55,6 +61,45 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/home',
         name: 'home',
         builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: '/groups',
+        name: 'groups',
+        builder: (context, state) => const GroupsListScreen(),
+      ),
+      GoRoute(
+        path: '/groups/create',
+        name: 'create-group',
+        builder: (context, state) => const CreateGroupScreen(),
+      ),
+      GoRoute(
+        path: '/groups/join',
+        name: 'join-group',
+        builder: (context, state) => const JoinGroupScreen(),
+      ),
+      GoRoute(
+        path: '/groups/:groupId',
+        name: 'group-detail',
+        builder: (context, state) {
+          final groupId = state.pathParameters['groupId']!;
+          return GroupDetailScreen(groupId: groupId);
+        },
+      ),
+      GoRoute(
+        path: '/groups/:groupId/recipes/create',
+        name: 'create-recipe',
+        builder: (context, state) {
+          final groupId = state.pathParameters['groupId']!;
+          return CreateRecipeScreen(groupId: groupId);
+        },
+      ),
+      GoRoute(
+        path: '/recipes/:recipeId/edit',
+        name: 'edit-recipe',
+        builder: (context, state) {
+          final recipeId = state.pathParameters['recipeId']!;
+          return EditRecipeScreen(recipeId: recipeId);
+        },
       ),
     ],
   );

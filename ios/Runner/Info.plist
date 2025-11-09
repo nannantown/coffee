@@ -45,6 +45,15 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Privacy - Camera Usage -->
+	<key>NSCameraUsageDescription</key>
+	<string>カメラを使用してエスプレッソの写真を撮影します</string>
+	<!-- Privacy - Photo Library Usage -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>フォトライブラリからエスプレッソの写真を選択します</string>
+	<!-- Privacy - Photo Library Add Usage (iOS 14+) -->
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>撮影したエスプレッソの写真をフォトライブラリに保存します</string>
 	<!-- URL Schemes Configuration -->
 	<key>CFBundleURLTypes</key>
 	<array>
