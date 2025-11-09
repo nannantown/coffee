@@ -78,13 +78,11 @@ class GroupService {
     }
   }
 
-  // グループメンバー一覧を取得
+  // グループメンバー一覧を取得（ユーザー名付き）
   Future<List<GroupMember>> getGroupMembers(String groupId) async {
     try {
       final response = await _supabase
-          .from('group_members')
-          .select()
-          .eq('group_id', groupId);
+          .rpc('get_group_members_with_usernames', params: {'p_group_id': groupId});
 
       return (response as List)
           .map((json) => GroupMember.fromJson(json))

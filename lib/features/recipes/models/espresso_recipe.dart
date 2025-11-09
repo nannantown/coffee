@@ -2,6 +2,7 @@ class EspressoRecipe {
   final String id;
   final String groupId;
   final String createdBy;
+  final String createdByUsername;
   final double coffeeWeight;
   final String grinderSetting;
   final int? extractionTime;
@@ -15,6 +16,7 @@ class EspressoRecipe {
     required this.id,
     required this.groupId,
     required this.createdBy,
+    required this.createdByUsername,
     required this.coffeeWeight,
     required this.grinderSetting,
     this.extractionTime,
@@ -30,6 +32,7 @@ class EspressoRecipe {
       id: json['id'] as String,
       groupId: json['group_id'] as String,
       createdBy: json['created_by'] as String,
+      createdByUsername: json['created_by_username'] as String? ?? 'Unknown',
       coffeeWeight: (json['coffee_weight'] as num).toDouble(),
       grinderSetting: json['grinder_setting'] as String,
       extractionTime: json['extraction_time'] as int?,
@@ -63,6 +66,7 @@ class EspressoRecipe {
     String? id,
     String? groupId,
     String? createdBy,
+    String? createdByUsername,
     double? coffeeWeight,
     String? grinderSetting,
     int? extractionTime,
@@ -76,6 +80,7 @@ class EspressoRecipe {
       id: id ?? this.id,
       groupId: groupId ?? this.groupId,
       createdBy: createdBy ?? this.createdBy,
+      createdByUsername: createdByUsername ?? this.createdByUsername,
       coffeeWeight: coffeeWeight ?? this.coffeeWeight,
       grinderSetting: grinderSetting ?? this.grinderSetting,
       extractionTime: extractionTime ?? this.extractionTime,

@@ -37,7 +37,17 @@ class RecipeService {
           .select()
           .single();
 
-      final recipe = EspressoRecipe.fromJson(response);
+      // ユーザー名を取得
+      final user = _supabase.auth.currentUser;
+      final username = user?.userMetadata?['username'] as String? ?? 'Unknown';
+
+      // レシピオブジェクトにユーザー名を追加
+      final recipeWithUsername = {
+        ...response,
+        'created_by_username': username,
+      };
+
+      final recipe = EspressoRecipe.fromJson(recipeWithUsername);
       print('✅ Recipe created: ${recipe.id}');
       return recipe;
     } catch (e) {
@@ -46,14 +56,11 @@ class RecipeService {
     }
   }
 
-  // グループのレシピ一覧を取得
+  // グループのレシピ一覧を取得（ユーザー名付き）
   Future<List<EspressoRecipe>> getGroupRecipes(String groupId) async {
     try {
       final response = await _supabase
-          .from('espresso_recipes')
-          .select()
-          .eq('group_id', groupId)
-          .order('created_at', ascending: false);
+          .rpc('get_recipes_with_usernames', params: {'p_group_id': groupId});
 
       return (response as List)
           .map((json) => EspressoRecipe.fromJson(json))

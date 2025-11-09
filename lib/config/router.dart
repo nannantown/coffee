@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../features/auth/providers/auth_provider.dart';
 import '../features/auth/screens/forgot_password_screen.dart';
-import '../features/auth/screens/home_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/signup_screen.dart';
 import '../features/groups/screens/groups_list_screen.dart';
@@ -29,12 +28,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           state.matchedLocation.startsWith('/signup') ||
           state.matchedLocation.startsWith('/forgot-password');
 
-      // 認証済みで認証画面にいる場合はホームへリダイレクト
+      // 認証済みで認証画面にいる場合はグループ一覧へリダイレクト
       if (isAuthenticated && isAuthRoute) {
-        return '/home';
+        return '/groups';
       }
 
-      // 未認証でホーム画面にいる場合はログイン画面へリダイレクト
+      // 未認証で認証が必要な画面にいる場合はログイン画面へリダイレクト
       if (!isAuthenticated && !isAuthRoute) {
         return '/login';
       }
@@ -56,11 +55,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/forgot-password',
         name: 'forgot-password',
         builder: (context, state) => const ForgotPasswordScreen(),
-      ),
-      GoRoute(
-        path: '/home',
-        name: 'home',
-        builder: (context, state) => const HomeScreen(),
       ),
       GoRoute(
         path: '/groups',

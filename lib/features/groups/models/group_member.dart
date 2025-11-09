@@ -2,6 +2,7 @@ class GroupMember {
   final String id;
   final String groupId;
   final String userId;
+  final String username;
   final String role; // 'owner' or 'member'
   final DateTime joinedAt;
 
@@ -9,6 +10,7 @@ class GroupMember {
     required this.id,
     required this.groupId,
     required this.userId,
+    required this.username,
     required this.role,
     required this.joinedAt,
   });
@@ -18,6 +20,7 @@ class GroupMember {
       id: json['id'] as String,
       groupId: json['group_id'] as String,
       userId: json['user_id'] as String,
+      username: json['username'] as String? ?? 'Unknown',
       role: json['role'] as String,
       joinedAt: DateTime.parse(json['joined_at'] as String),
     );
@@ -28,6 +31,7 @@ class GroupMember {
       'id': id,
       'group_id': groupId,
       'user_id': userId,
+      'username': username,
       'role': role,
       'joined_at': joinedAt.toIso8601String(),
     };

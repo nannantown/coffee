@@ -15,20 +15,25 @@ class AuthService {
   /// メールアドレスとパスワードでサインアップ
   /// [email] ユーザーのメールアドレス
   /// [password] パスワード（6文字以上推奨）
+  /// [username] ユーザー名（表示名）
   ///
   /// 成功時: AuthResponseを返す
   /// 失敗時: 例外をスロー
   Future<AuthResponse> signUpWithEmail({
     required String email,
     required String password,
+    required String username,
   }) async {
     try {
       final response = await _supabase.auth.signUp(
         email: email,
         password: password,
+        data: {
+          'username': username,
+        },
         emailRedirectTo: kIsWeb ? null : 'io.supabase.flutterquickstart://login-callback/',
       );
-      debugPrint('✅ Sign up successful: ${response.user?.email}');
+      debugPrint('✅ Sign up successful: ${response.user?.email} (${response.user?.userMetadata?['username']})');
       return response;
     } catch (e) {
       debugPrint('❌ Sign up failed: $e');
@@ -87,6 +92,34 @@ class AuthService {
       debugPrint('✅ Sign out successful');
     } catch (e) {
       debugPrint('❌ Sign out failed: $e');
+      rethrow;
+    }
+  }
+
+  /// アカウント削除
+  /// ユーザーの関連データとアカウント自体を完全に削除します
+  ///
+  /// 注意: この操作は取り消せません
+  ///
+  /// 成功時: voidを返す
+  /// 失敗時: 例外をスロー
+  Future<void> deleteAccount() async {
+    try {
+      final user = currentUser;
+      if (user == null) {
+        throw Exception('User not authenticated');
+      }
+
+      // Edge Functionを呼び出してアカウントを削除
+      final response = await _supabase.functions.invoke('delete-user-account');
+
+      if (response.status != 200) {
+        throw Exception('Failed to delete account: ${response.data}');
+      }
+
+      debugPrint('✅ Account deleted successfully');
+    } catch (e) {
+      debugPrint('❌ Account deletion failed: $e');
       rethrow;
     }
   }

@@ -55,17 +55,23 @@ class GroupDetailScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // メンバー数表示
+            // メンバー数表示（タップでメンバー一覧を表示）
             membersAsync.when(
               data: (members) => Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.people),
-                      const SizedBox(width: 8),
-                      Text('${members.length} members'),
-                    ],
+                child: InkWell(
+                  onTap: () => _showMembersDialog(context, members),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.people),
+                        const SizedBox(width: 8),
+                        Text('${members.length} members'),
+                        const Spacer(),
+                        const Icon(Icons.chevron_right, size: 20),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -119,6 +125,45 @@ class GroupDetailScreen extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showMembersDialog(BuildContext context, List<dynamic> members) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Group Members'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: members.length,
+            itemBuilder: (context, index) {
+              final member = members[index];
+              return ListTile(
+                leading: CircleAvatar(
+                  child: Text(
+                    member.username.isNotEmpty
+                        ? member.username[0].toUpperCase()
+                        : '?',
+                  ),
+                ),
+                title: Text(member.username),
+                subtitle: Text(member.role == 'owner' ? 'Owner' : 'Member'),
+                trailing: member.role == 'owner'
+                    ? const Icon(Icons.star, color: Colors.amber, size: 20)
+                    : null,
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }
