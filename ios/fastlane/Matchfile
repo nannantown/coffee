@@ -1,0 +1,15 @@
+# Matchfile - Configuration for code signing with Match
+
+git_url(ENV["MATCH_GIT_URL"]) # Git repository for storing certificates
+git_branch("main") # Branch to use in the certificates repository
+
+storage_mode("git") # Storage mode (git, google_cloud, s3, etc.)
+
+type("appstore") # The default type, can be: appstore, adhoc, development, enterprise
+
+app_identifier(["com.example.account_template"])
+
+username(ENV["FASTLANE_APPLE_ID"]) # Your Apple Developer Portal email
+
+# For more information about the Matchfile, see:
+#     https://docs.fastlane.tools/actions/match/

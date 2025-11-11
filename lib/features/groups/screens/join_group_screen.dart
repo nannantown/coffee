@@ -41,7 +41,7 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Joined group successfully')),
+          const SnackBar(content: Text('グループに参加しました')),
         );
         // グループ一覧をリフレッシュ
         ref.invalidate(userGroupsProvider);
@@ -64,7 +64,7 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Join Group'),
+        title: const Text('グループに参加'),
       ),
       body: Form(
         key: _formKey,
@@ -72,20 +72,20 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
           padding: const EdgeInsets.all(16),
           children: [
             const Text(
-              'Enter the invite code you received to join a group',
+              '受け取った招待コードを入力してグループに参加',
               style: TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 24),
             TextFormField(
               controller: _inviteCodeController,
               decoration: const InputDecoration(
-                labelText: 'Invite Code',
-                hintText: 'Enter invite code',
+                labelText: '招待コード',
+                hintText: '招待コードを入力',
                 border: OutlineInputBorder(),
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Please enter an invite code';
+                  return '招待コードを入力してください';
                 }
                 return null;
               },
@@ -100,7 +100,7 @@ class _JoinGroupScreenState extends ConsumerState<JoinGroupScreen> {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Join Group'),
+                  : const Text('グループに参加'),
             ),
           ],
         ),

@@ -14,17 +14,22 @@ class GroupsListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Coffee Groups'),
+        title: const Text('マイグループ'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () => context.push('/profile'),
+            tooltip: 'プロフィール',
+          ),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () => context.push('/groups/create'),
-            tooltip: 'Create Group',
+            tooltip: 'グループを作成',
           ),
           IconButton(
             icon: const Icon(Icons.link),
             onPressed: () => context.push('/groups/join'),
-            tooltip: 'Join Group',
+            tooltip: 'グループに参加',
           ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
@@ -64,75 +69,6 @@ class GroupsListScreen extends ConsumerWidget {
                     }
                   }
                 }
-              } else if (value == 'delete_account') {
-                final shouldDelete = await showDialog<bool>(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('データ削除'),
-                    content: const Text(
-                      'すべてのグループとレシピを完全に削除します。\n\nこの操作は取り消せません。本当に削除しますか？',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(false),
-                        child: const Text('キャンセル'),
-                      ),
-                      FilledButton(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Colors.red,
-                        ),
-                        onPressed: () => Navigator.of(context).pop(true),
-                        child: const Text('削除する'),
-                      ),
-                    ],
-                  ),
-                );
-
-                if (shouldDelete == true && context.mounted) {
-                  // さらに確認
-                  final confirmDelete = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('最終確認'),
-                      content: const Text(
-                        '本当にすべてのデータを削除しますか？\n\n・すべてのグループが削除されます\n・すべてのレシピが削除されます\n・アップロードした写真が削除されます\n\n削除後は自動的にログアウトされます。',
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(false),
-                          child: const Text('キャンセル'),
-                        ),
-                        FilledButton(
-                          style: FilledButton.styleFrom(
-                            backgroundColor: Colors.red,
-                          ),
-                          onPressed: () => Navigator.of(context).pop(true),
-                          child: const Text('完全に削除'),
-                        ),
-                      ],
-                    ),
-                  );
-
-                  if (confirmDelete == true && context.mounted) {
-                    try {
-                      await authService.deleteAccount();
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('すべてのデータを削除しました'),
-                            duration: Duration(seconds: 3),
-                          ),
-                        );
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('削除エラー: ${e.toString()}')),
-                        );
-                      }
-                    }
-                  }
-                }
               }
             },
             itemBuilder: (context) => [
@@ -143,16 +79,6 @@ class GroupsListScreen extends ConsumerWidget {
                     Icon(Icons.logout),
                     SizedBox(width: 8),
                     Text('ログアウト'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'delete_account',
-                child: Row(
-                  children: [
-                    Icon(Icons.delete_forever, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text('全データ削除', style: TextStyle(color: Colors.red)),
                   ],
                 ),
               ),
@@ -174,19 +100,19 @@ class GroupsListScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    'No groups yet',
+                    'グループがありません',
                     style: TextStyle(fontSize: 18, color: Colors.grey),
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Create or join a group to get started',
+                    'グループを作成または参加してください',
                     style: TextStyle(color: Colors.grey),
                   ),
                   const SizedBox(height: 24),
                   FilledButton.icon(
                     onPressed: () => context.push('/groups/create'),
                     icon: const Icon(Icons.add),
-                    label: const Text('Create Group'),
+                    label: const Text('グループを作成'),
                   ),
                 ],
               ),
@@ -207,7 +133,7 @@ class GroupsListScreen extends ConsumerWidget {
                     ),
                     title: Text(group.name),
                     subtitle: Text(
-                      'Created ${_formatDate(group.createdAt)}',
+                      '作成日: ${_formatDate(group.createdAt)}',
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push('/groups/${group.id}'),
@@ -224,11 +150,11 @@ class GroupsListScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.error_outline, size: 48, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Error: $error'),
+              Text('エラー: $error'),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: () => ref.refresh(userGroupsProvider),
-                child: const Text('Retry'),
+                child: const Text('再試行'),
               ),
             ],
           ),
@@ -242,11 +168,11 @@ class GroupsListScreen extends ConsumerWidget {
     final difference = now.difference(date);
 
     if (difference.inDays == 0) {
-      return 'today';
+      return '今日';
     } else if (difference.inDays == 1) {
-      return 'yesterday';
+      return '昨日';
     } else if (difference.inDays < 7) {
-      return '${difference.inDays} days ago';
+      return '${difference.inDays}日前';
     } else {
       return '${date.year}/${date.month}/${date.day}';
     }

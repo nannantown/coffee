@@ -135,4 +135,69 @@ class GroupService {
       return false;
     }
   }
+
+  // オーナー権限を譲渡
+  Future<void> transferOwnership(String groupId, String newOwnerId) async {
+    try {
+      // グループのowner_idを更新
+      await _supabase
+          .from('coffee_groups')
+          .update({'owner_id': newOwnerId, 'updated_at': DateTime.now().toIso8601String()})
+          .eq('id', groupId);
+
+      // 新オーナーのroleを'owner'に更新
+      await _supabase
+          .from('group_members')
+          .update({'role': 'owner'})
+          .eq('group_id', groupId)
+          .eq('user_id', newOwnerId);
+
+      // 旧オーナーのroleを'member'に更新（後で削除される）
+      print('✅ Ownership transferred to: $newOwnerId');
+    } catch (e) {
+      print('❌ Error transferring ownership: $e');
+      rethrow;
+    }
+  }
+
+  // グループから退会
+  Future<void> leaveGroup(String groupId, String userId) async {
+    try {
+      await _supabase
+          .from('group_members')
+          .delete()
+          .eq('group_id', groupId)
+          .eq('user_id', userId);
+
+      print('✅ User left group: $groupId');
+    } catch (e) {
+      print('❌ Error leaving group: $e');
+      rethrow;
+    }
+  }
+
+  // グループ名を更新（メンバーなら誰でも可能）
+  Future<void> updateGroupName(String groupId, String userId, String newName) async {
+    try {
+      // メンバーかチェック
+      final isMember = await isGroupMember(groupId, userId);
+      if (!isMember) {
+        throw Exception('Only group members can update the group name');
+      }
+
+      // グループ名を更新
+      await _supabase
+          .from('coffee_groups')
+          .update({
+            'name': newName,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', groupId);
+
+      print('✅ Group name updated: $newName');
+    } catch (e) {
+      print('❌ Error updating group name: $e');
+      rethrow;
+    }
+  }
 }

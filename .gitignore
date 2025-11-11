@@ -70,3 +70,14 @@ ios/Runner.xcodeproj/xcuserdata/
 .env
 .env.local
 .env.*.local
+
+# Signing keys and secrets
+/android/key.properties
+/android/app/upload-keystore.jks
+/android/app/*.jks
+
+# Fastlane
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output

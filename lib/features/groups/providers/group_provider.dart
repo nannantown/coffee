@@ -78,6 +78,55 @@ class GroupNotifier extends Notifier<AsyncValue<void>> {
       state = AsyncValue.error(e, stack);
     }
   }
+
+  Future<void> leaveGroup({
+    required String groupId,
+    required String userId,
+    required bool isOwner,
+    String? newOwnerId,
+    required int memberCount,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      final groupService = ref.read(groupServiceProvider);
+
+      // オーナーで最後のメンバーの場合はグループを削除
+      if (isOwner && memberCount == 1) {
+        await groupService.deleteGroup(groupId, userId);
+      }
+      // オーナーで他にメンバーがいる場合はオーナー権限を譲渡
+      else if (isOwner && newOwnerId != null) {
+        await groupService.transferOwnership(groupId, newOwnerId);
+        await groupService.leaveGroup(groupId, userId);
+      }
+      // 通常メンバーの場合は退会
+      else {
+        await groupService.leaveGroup(groupId, userId);
+      }
+
+      state = const AsyncValue.data(null);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      rethrow;
+    }
+  }
+
+  Future<void> updateGroupName(String groupId, String userId, String newName) async {
+    state = const AsyncValue.loading();
+    try {
+      final groupService = ref.read(groupServiceProvider);
+      await groupService.updateGroupName(groupId, userId, newName);
+
+      // グループ詳細をリフレッシュ
+      ref.invalidate(groupDetailProvider(groupId));
+      ref.invalidate(userGroupsProvider);
+
+      state = const AsyncValue.data(null);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      rethrow;
+    }
+  }
 }
 
 final groupNotifierProvider =

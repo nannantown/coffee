@@ -4,6 +4,7 @@ import '../features/auth/providers/auth_provider.dart';
 import '../features/auth/screens/forgot_password_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/signup_screen.dart';
+import '../features/auth/screens/profile_screen.dart';
 import '../features/groups/screens/groups_list_screen.dart';
 import '../features/groups/screens/group_detail_screen.dart';
 import '../features/groups/screens/create_group_screen.dart';
@@ -55,6 +56,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/forgot-password',
         name: 'forgot-password',
         builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/profile',
+        name: 'profile',
+        builder: (context, state) => const ProfileScreen(),
       ),
       GoRoute(
         path: '/groups',

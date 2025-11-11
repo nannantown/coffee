@@ -38,7 +38,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
 
       if (group != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Group created successfully')),
+          const SnackBar(content: Text('グループを作成しました')),
         );
         // グループ一覧をリフレッシュ
         ref.invalidate(userGroupsProvider);
@@ -61,7 +61,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Group'),
+        title: const Text('グループを作成'),
       ),
       body: Form(
         key: _formKey,
@@ -71,16 +71,16 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
             TextFormField(
               controller: _nameController,
               decoration: const InputDecoration(
-                labelText: 'Group Name',
-                hintText: 'Enter group name',
+                labelText: 'グループ名',
+                hintText: 'グループ名を入力',
                 border: OutlineInputBorder(),
               ),
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a group name';
+                  return 'グループ名を入力してください';
                 }
-                if (value.trim().length < 3) {
-                  return 'Group name must be at least 3 characters';
+                if (value.trim().length < 2) {
+                  return 'グループ名は2文字以上で入力してください';
                 }
                 return null;
               },
@@ -95,7 +95,7 @@ class _CreateGroupScreenState extends ConsumerState<CreateGroupScreen> {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Create Group'),
+                  : const Text('グループを作成'),
             ),
           ],
         ),

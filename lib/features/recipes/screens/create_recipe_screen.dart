@@ -17,20 +17,21 @@ class CreateRecipeScreen extends ConsumerStatefulWidget {
 
 class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _coffeeWeightController = TextEditingController();
-  final _grinderSettingController = TextEditingController();
-  final _extractionTimeController = TextEditingController();
+  final _notesController = TextEditingController();
 
+  double _coffeeWeight = 18.0;
+  int _grinderSetting = 240;
+  int _extractionTime = 0;
   double _roastLevel = 0.5;
   int _rating = 3;
+  int _appearanceRating = 3;
+  int _tasteRating = 3;
   File? _selectedImage;
   bool _isLoading = false;
 
   @override
   void dispose() {
-    _coffeeWeightController.dispose();
-    _grinderSettingController.dispose();
-    _extractionTimeController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -57,19 +58,20 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
       final recipe = await notifier.createRecipe(
         groupId: widget.groupId,
         userId: userId,
-        coffeeWeight: double.parse(_coffeeWeightController.text),
-        grinderSetting: _grinderSettingController.text,
-        extractionTime: _extractionTimeController.text.isNotEmpty
-            ? int.parse(_extractionTimeController.text)
-            : null,
+        coffeeWeight: _coffeeWeight,
+        grinderSetting: _grinderSetting.toString(),
+        extractionTime: _extractionTime,
         roastLevel: _roastLevel,
         rating: _rating,
+        appearanceRating: _appearanceRating,
+        tasteRating: _tasteRating,
+        notes: _notesController.text.isNotEmpty ? _notesController.text : null,
         photoUrl: photoUrl,
       );
 
       if (recipe != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Recipe created successfully')),
+          const SnackBar(content: Text('レシピを作成しました')),
         );
         // レシピ一覧をリフレッシュ
         ref.invalidate(groupRecipesProvider(widget.groupId));
@@ -92,18 +94,26 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Recipe'),
+        title: const Text('レシピを作成'),
       ),
       body: RecipeForm(
         formKey: _formKey,
-        coffeeWeightController: _coffeeWeightController,
-        grinderSettingController: _grinderSettingController,
-        extractionTimeController: _extractionTimeController,
+        coffeeWeight: _coffeeWeight,
+        grinderSetting: _grinderSetting,
+        extractionTime: _extractionTime,
+        notesController: _notesController,
         roastLevel: _roastLevel,
         rating: _rating,
+        appearanceRating: _appearanceRating,
+        tasteRating: _tasteRating,
         selectedImage: _selectedImage,
+        onCoffeeWeightChanged: (value) => setState(() => _coffeeWeight = value),
+        onGrinderSettingChanged: (value) => setState(() => _grinderSetting = value),
+        onExtractionTimeChanged: (value) => setState(() => _extractionTime = value),
         onRoastLevelChanged: (value) => setState(() => _roastLevel = value),
         onRatingChanged: (value) => setState(() => _rating = value),
+        onAppearanceRatingChanged: (value) => setState(() => _appearanceRating = value),
+        onTasteRatingChanged: (value) => setState(() => _tasteRating = value),
         onImageSelected: (image) => setState(() => _selectedImage = image),
       ),
       bottomNavigationBar: SafeArea(
@@ -117,7 +127,7 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
                     width: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Create Recipe'),
+                : const Text('レシピを作成'),
           ),
         ),
       ),

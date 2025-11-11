@@ -8,7 +8,11 @@ class EspressoRecipe {
   final int? extractionTime;
   final double? roastLevel;
   final int rating;
+  final int appearanceRating;
+  final int tasteRating;
+  final String? notes;
   final String? photoUrl;
+  final bool isFavorite;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -22,7 +26,11 @@ class EspressoRecipe {
     this.extractionTime,
     this.roastLevel,
     required this.rating,
+    required this.appearanceRating,
+    required this.tasteRating,
+    this.notes,
     this.photoUrl,
+    required this.isFavorite,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -39,8 +47,12 @@ class EspressoRecipe {
       roastLevel: json['roast_level'] != null
           ? (json['roast_level'] as num).toDouble()
           : null,
-      rating: json['rating'] as int,
+      rating: json['rating'] as int? ?? 3,
+      appearanceRating: json['appearance_rating'] as int? ?? json['rating'] as int? ?? 3,
+      tasteRating: json['taste_rating'] as int? ?? json['rating'] as int? ?? 3,
+      notes: json['notes'] as String?,
       photoUrl: json['photo_url'] as String?,
+      isFavorite: json['is_favorite'] as bool? ?? false,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
@@ -56,7 +68,11 @@ class EspressoRecipe {
       'extraction_time': extractionTime,
       'roast_level': roastLevel,
       'rating': rating,
+      'appearance_rating': appearanceRating,
+      'taste_rating': tasteRating,
+      'notes': notes,
       'photo_url': photoUrl,
+      'is_favorite': isFavorite,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
@@ -72,7 +88,11 @@ class EspressoRecipe {
     int? extractionTime,
     double? roastLevel,
     int? rating,
+    int? appearanceRating,
+    int? tasteRating,
+    String? notes,
     String? photoUrl,
+    bool? isFavorite,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -86,7 +106,11 @@ class EspressoRecipe {
       extractionTime: extractionTime ?? this.extractionTime,
       roastLevel: roastLevel ?? this.roastLevel,
       rating: rating ?? this.rating,
+      appearanceRating: appearanceRating ?? this.appearanceRating,
+      tasteRating: tasteRating ?? this.tasteRating,
+      notes: notes ?? this.notes,
       photoUrl: photoUrl ?? this.photoUrl,
+      isFavorite: isFavorite ?? this.isFavorite,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

@@ -45,6 +45,9 @@ class RecipeNotifier extends Notifier<AsyncValue<void>> {
     int? extractionTime,
     double? roastLevel,
     required int rating,
+    required int appearanceRating,
+    required int tasteRating,
+    String? notes,
     String? photoUrl,
   }) async {
     state = const AsyncValue.loading();
@@ -58,6 +61,9 @@ class RecipeNotifier extends Notifier<AsyncValue<void>> {
         extractionTime: extractionTime,
         roastLevel: roastLevel,
         rating: rating,
+        appearanceRating: appearanceRating,
+        tasteRating: tasteRating,
+        notes: notes,
         photoUrl: photoUrl,
       );
       state = const AsyncValue.data(null);
@@ -76,6 +82,9 @@ class RecipeNotifier extends Notifier<AsyncValue<void>> {
     int? extractionTime,
     double? roastLevel,
     int? rating,
+    int? appearanceRating,
+    int? tasteRating,
+    String? notes,
     String? photoUrl,
   }) async {
     state = const AsyncValue.loading();
@@ -89,6 +98,9 @@ class RecipeNotifier extends Notifier<AsyncValue<void>> {
         extractionTime: extractionTime,
         roastLevel: roastLevel,
         rating: rating,
+        appearanceRating: appearanceRating,
+        tasteRating: tasteRating,
+        notes: notes,
         photoUrl: photoUrl,
       );
       state = const AsyncValue.data(null);
@@ -103,10 +115,30 @@ class RecipeNotifier extends Notifier<AsyncValue<void>> {
     state = const AsyncValue.loading();
     try {
       final recipeService = ref.read(recipeServiceProvider);
+      final recipe = await recipeService.getRecipe(recipeId);
       await recipeService.deleteRecipe(recipeId, userId);
+
+      // レシピ一覧を更新
+      ref.invalidate(groupRecipesProvider(recipe.groupId));
+
       state = const AsyncValue.data(null);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
+      rethrow;
+    }
+  }
+
+  Future<void> toggleFavorite(String recipeId, String groupId) async {
+    try {
+      final recipeService = ref.read(recipeServiceProvider);
+      await recipeService.toggleFavorite(recipeId);
+
+      // レシピ一覧を更新
+      ref.invalidate(groupRecipesProvider(groupId));
+      ref.invalidate(recipeDetailProvider(recipeId));
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      rethrow;
     }
   }
 }

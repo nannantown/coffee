@@ -15,6 +15,9 @@ class RecipeService {
     int? extractionTime,
     double? roastLevel,
     required int rating,
+    required int appearanceRating,
+    required int tasteRating,
+    String? notes,
     String? photoUrl,
   }) async {
     try {
@@ -30,6 +33,9 @@ class RecipeService {
             'extraction_time': extractionTime,
             'roast_level': roastLevel,
             'rating': rating,
+            'appearance_rating': appearanceRating,
+            'taste_rating': tasteRating,
+            'notes': notes,
             'photo_url': photoUrl,
             'created_at': now,
             'updated_at': now,
@@ -96,6 +102,9 @@ class RecipeService {
     int? extractionTime,
     double? roastLevel,
     int? rating,
+    int? appearanceRating,
+    int? tasteRating,
+    String? notes,
     String? photoUrl,
   }) async {
     try {
@@ -116,6 +125,9 @@ class RecipeService {
       if (extractionTime != null) updateData['extraction_time'] = extractionTime;
       if (roastLevel != null) updateData['roast_level'] = roastLevel;
       if (rating != null) updateData['rating'] = rating;
+      if (appearanceRating != null) updateData['appearance_rating'] = appearanceRating;
+      if (tasteRating != null) updateData['taste_rating'] = tasteRating;
+      if (notes != null) updateData['notes'] = notes;
       if (photoUrl != null) updateData['photo_url'] = photoUrl;
 
       final response = await _supabase
@@ -148,6 +160,28 @@ class RecipeService {
       print('✅ Recipe deleted: $recipeId');
     } catch (e) {
       print('❌ Error deleting recipe: $e');
+      rethrow;
+    }
+  }
+
+  // お気に入りトグル（グループメンバー誰でも変更可能）
+  Future<void> toggleFavorite(String recipeId) async {
+    try {
+      // 現在の状態を取得
+      final recipe = await getRecipe(recipeId);
+
+      // お気に入り状態を反転
+      await _supabase
+          .from('espresso_recipes')
+          .update({
+            'is_favorite': !recipe.isFavorite,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', recipeId);
+
+      print('✅ Recipe favorite toggled: $recipeId -> ${!recipe.isFavorite}');
+    } catch (e) {
+      print('❌ Error toggling favorite: $e');
       rethrow;
     }
   }

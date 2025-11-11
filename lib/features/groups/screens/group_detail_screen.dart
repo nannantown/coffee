@@ -5,42 +5,102 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import '../providers/group_provider.dart';
+import '../models/group_member.dart';
 import '../../recipes/providers/recipe_provider.dart';
+import '../../recipes/models/espresso_recipe.dart';
 import '../../recipes/widgets/recipe_list_item.dart';
 
-class GroupDetailScreen extends ConsumerWidget {
+class GroupDetailScreen extends ConsumerStatefulWidget {
   final String groupId;
 
   const GroupDetailScreen({super.key, required this.groupId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final groupAsync = ref.watch(groupDetailProvider(groupId));
-    final recipesAsync = ref.watch(groupRecipesProvider(groupId));
-    final membersAsync = ref.watch(groupMembersProvider(groupId));
+  ConsumerState<GroupDetailScreen> createState() => _GroupDetailScreenState();
+}
+
+class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final groupAsync = ref.watch(groupDetailProvider(widget.groupId));
+    final recipesAsync = ref.watch(groupRecipesProvider(widget.groupId));
+    final membersAsync = ref.watch(groupMembersProvider(widget.groupId));
 
     return Scaffold(
       appBar: AppBar(
         title: groupAsync.when(
           data: (group) => Text(group.name),
-          loading: () => const Text('Loading...'),
-          error: (_, __) => const Text('Error'),
+          loading: () => const Text('読み込み中...'),
+          error: (_, __) => const Text('エラー'),
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.share),
             onPressed: () => _showInviteDialog(context, ref),
-            tooltip: 'Invite',
+            tooltip: '招待',
           ),
           PopupMenuButton(
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'delete',
-                child: Text('Delete Group'),
-              ),
-            ],
+            itemBuilder: (context) {
+              final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+              final isOwner = groupAsync.value?.ownerId == currentUserId;
+
+              return [
+                const PopupMenuItem(
+                  value: 'edit_name',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit, size: 20),
+                      SizedBox(width: 8),
+                      Text('グループ名を編集'),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'leave',
+                  child: Row(
+                    children: [
+                      Icon(Icons.exit_to_app, size: 20),
+                      SizedBox(width: 8),
+                      Text('グループを退会'),
+                    ],
+                  ),
+                ),
+                if (isOwner)
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete, size: 20, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text('グループを削除', style: TextStyle(color: Colors.red)),
+                      ],
+                    ),
+                  ),
+              ];
+            },
             onSelected: (value) {
-              if (value == 'delete') {
+              if (value == 'edit_name') {
+                groupAsync.whenData((group) {
+                  _showEditGroupNameDialog(context, ref, group.name);
+                });
+              } else if (value == 'leave') {
+                _confirmLeaveGroup(context, ref);
+              } else if (value == 'delete') {
                 _confirmDelete(context, ref);
               }
             },
@@ -49,79 +109,74 @@ class GroupDetailScreen extends ConsumerWidget {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          ref.invalidate(groupRecipesProvider(groupId));
-          ref.invalidate(groupMembersProvider(groupId));
+          ref.invalidate(groupRecipesProvider(widget.groupId));
+          ref.invalidate(groupMembersProvider(widget.groupId));
         },
-        child: ListView(
-          padding: const EdgeInsets.all(16),
+        child: Column(
           children: [
-            // メンバー数表示（タップでメンバー一覧を表示）
-            membersAsync.when(
-              data: (members) => Card(
-                child: InkWell(
-                  onTap: () => _showMembersDialog(context, members),
-                  borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.people),
-                        const SizedBox(width: 8),
-                        Text('${members.length} members'),
-                        const Spacer(),
-                        const Icon(Icons.chevron_right, size: 20),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
-            ),
-            const SizedBox(height: 16),
-            // レシピ一覧
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Recipes',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                FilledButton.icon(
-                  onPressed: () => context.push('/groups/$groupId/recipes/create'),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Recipe'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            recipesAsync.when(
-              data: (recipes) {
-                if (recipes.isEmpty) {
-                  return const Center(
+            // メンバー数表示（固定）
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: membersAsync.when(
+                data: (members) => Card(
+                  child: InkWell(
+                    onTap: () => _showMembersDialog(context, members),
+                    borderRadius: BorderRadius.circular(12),
                     child: Padding(
-                      padding: EdgeInsets.all(32),
-                      child: Column(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
                         children: [
-                          Icon(Icons.coffee_outlined, size: 48, color: Colors.grey),
-                          SizedBox(height: 16),
-                          Text(
-                            'No recipes yet',
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
-                          ),
+                          const Icon(Icons.people),
+                          const SizedBox(width: 8),
+                          Text('${members.length}人のメンバー'),
+                          const Spacer(),
+                          const Icon(Icons.chevron_right, size: 20),
                         ],
                       ),
                     ),
-                  );
-                }
-                return Column(
-                  children: recipes
-                      .map((recipe) => RecipeListItem(recipe: recipe))
-                      .toList(),
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(child: Text('Error: $error')),
+                  ),
+                ),
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+              ),
+            ),
+            // Recipesヘッダー（固定）
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'レシピ',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  FilledButton.icon(
+                    onPressed: () => context.push('/groups/${widget.groupId}/recipes/create'),
+                    icon: const Icon(Icons.add),
+                    label: const Text('レシピを追加'),
+                  ),
+                ],
+              ),
+            ),
+            // タブバー
+            TabBar(
+              controller: _tabController,
+              tabs: const [
+                Tab(text: 'すべて'),
+                Tab(text: 'お気に入り'),
+              ],
+            ),
+            // タブビュー（レシピリストのみ切り替わる）
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  // すべてのレシピタブ
+                  _buildRecipeListOnly(context, ref, recipesAsync),
+                  // お気に入りタブ
+                  _buildRecipeListOnly(context, ref, recipesAsync, showFavoritesOnly: true),
+                ],
+              ),
             ),
           ],
         ),
@@ -129,11 +184,60 @@ class GroupDetailScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildRecipeListOnly(
+    BuildContext context,
+    WidgetRef ref,
+    AsyncValue<List<EspressoRecipe>> recipesAsync, {
+    bool showFavoritesOnly = false,
+  }) {
+    return recipesAsync.when(
+      data: (recipes) {
+        // フィルタリング: お気に入りタブの場合はお気に入りのみ表示
+        final filteredRecipes = showFavoritesOnly
+            ? recipes.where((recipe) => recipe.isFavorite).toList()
+            : recipes;
+
+        if (filteredRecipes.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    showFavoritesOnly ? Icons.star_border : Icons.coffee_outlined,
+                    size: 48,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    showFavoritesOnly ? 'お気に入りのレシピがありません' : 'レシピがありません',
+                    style: const TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: filteredRecipes.length,
+          itemBuilder: (context, index) {
+            return RecipeListItem(recipe: filteredRecipes[index]);
+          },
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text('エラー: $error')),
+    );
+  }
+
   void _showMembersDialog(BuildContext context, List<dynamic> members) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Group Members'),
+        title: const Text('グループメンバー'),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView.builder(
@@ -150,7 +254,7 @@ class GroupDetailScreen extends ConsumerWidget {
                   ),
                 ),
                 title: Text(member.username),
-                subtitle: Text(member.role == 'owner' ? 'Owner' : 'Member'),
+                subtitle: Text(member.role == 'owner' ? 'オーナー' : 'メンバー'),
                 trailing: member.role == 'owner'
                     ? const Icon(Icons.star, color: Colors.amber, size: 20)
                     : null,
@@ -161,7 +265,7 @@ class GroupDetailScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: const Text('閉じる'),
           ),
         ],
       ),
@@ -174,44 +278,46 @@ class GroupDetailScreen extends ConsumerWidget {
 
     try {
       final invitationService = ref.read(invitationServiceProvider);
-      final invitation = await invitationService.createInvitation(groupId, userId);
+      final invitation = await invitationService.createInvitation(widget.groupId, userId);
 
       if (context.mounted) {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Invite to Group'),
+            title: const Text('グループに招待'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Share this invite code:'),
+                const Text('この招待コードを共有してください:'),
                 const SizedBox(height: 16),
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey[300]!, width: 1),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         invitation.inviteCode,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
+                          color: Colors.grey[900],
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.copy),
+                        icon: Icon(Icons.copy, color: Colors.grey[700]),
                         onPressed: () {
                           Clipboard.setData(
                             ClipboardData(text: invitation.inviteCode),
                           );
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Copied to clipboard'),
+                              content: Text('クリップボードにコピーしました'),
                             ),
                           );
                         },
@@ -224,14 +330,18 @@ class GroupDetailScreen extends ConsumerWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Close'),
+                child: const Text('閉じる'),
               ),
               FilledButton.icon(
-                onPressed: () {
-                  Share.share('Join my coffee group! Invite code: ${invitation.inviteCode}');
+                onPressed: () async {
+                  final box = context.findRenderObject() as RenderBox?;
+                  await Share.share(
+                    'コーヒーグループに参加しましょう！招待コード: ${invitation.inviteCode}',
+                    sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
+                  );
                 },
                 icon: const Icon(Icons.share),
-                label: const Text('Share'),
+                label: const Text('共有'),
               ),
             ],
           ),
@@ -240,8 +350,250 @@ class GroupDetailScreen extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text('エラー: $e')),
         );
+      }
+    }
+  }
+
+  Future<void> _confirmLeaveGroup(BuildContext context, WidgetRef ref) async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) return;
+
+    try {
+      // グループとメンバー情報を取得
+      final group = await ref.read(groupDetailProvider(widget.groupId).future);
+      final members = await ref.read(groupMembersProvider(widget.groupId).future);
+
+      final isOwner = group.ownerId == userId;
+      final memberCount = members.length;
+
+      // オーナーで他にメンバーがいる場合は、オーナー譲渡先を選択
+      if (isOwner && memberCount > 1) {
+        final otherMembers = members.where((m) => m.userId != userId).toList();
+
+        final selectedMember = await showDialog<GroupMember>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('オーナー権限の譲渡'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('グループのオーナー権限を譲渡するメンバーを選択してください'),
+                const SizedBox(height: 16),
+                ...otherMembers.map((member) => ListTile(
+                  title: Text(member.username),
+                  onTap: () => Navigator.pop(context, member),
+                )),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('キャンセル'),
+              ),
+            ],
+          ),
+        );
+
+        if (selectedMember == null) return;
+
+        // 確認ダイアログ
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('グループを退会'),
+            content: Text(
+              '${selectedMember.username}にオーナー権限を譲渡して退会しますか？',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('キャンセル'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('退会'),
+              ),
+            ],
+          ),
+        );
+
+        if (confirmed == true && context.mounted) {
+          final notifier = ref.read(groupNotifierProvider.notifier);
+          await notifier.leaveGroup(
+            groupId: widget.groupId,
+            userId: userId,
+            isOwner: true,
+            newOwnerId: selectedMember.userId,
+            memberCount: memberCount,
+          );
+
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('グループを退会しました')),
+            );
+            ref.invalidate(userGroupsProvider);
+            context.pop();
+          }
+        }
+      }
+      // オーナーで最後のメンバーの場合はグループ削除確認
+      else if (isOwner && memberCount == 1) {
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('グループを削除'),
+            content: const Text(
+              'あなたは最後のメンバーです。グループを削除しますか？',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('キャンセル'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('削除'),
+              ),
+            ],
+          ),
+        );
+
+        if (confirmed == true && context.mounted) {
+          final notifier = ref.read(groupNotifierProvider.notifier);
+          await notifier.leaveGroup(
+            groupId: widget.groupId,
+            userId: userId,
+            isOwner: true,
+            memberCount: 1,
+          );
+
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('グループを削除しました')),
+            );
+            ref.invalidate(userGroupsProvider);
+            context.pop();
+          }
+        }
+      }
+      // 通常メンバーの場合
+      else {
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('グループを退会'),
+            content: const Text('本当にグループを退会しますか？'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('キャンセル'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('退会'),
+              ),
+            ],
+          ),
+        );
+
+        if (confirmed == true && context.mounted) {
+          final notifier = ref.read(groupNotifierProvider.notifier);
+          await notifier.leaveGroup(
+            groupId: widget.groupId,
+            userId: userId,
+            isOwner: false,
+            memberCount: memberCount,
+          );
+
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('グループを退会しました')),
+            );
+            ref.invalidate(userGroupsProvider);
+            context.pop();
+          }
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('エラー: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _showEditGroupNameDialog(
+    BuildContext context,
+    WidgetRef ref,
+    String currentName,
+  ) async {
+    final controller = TextEditingController(text: currentName);
+    final formKey = GlobalKey<FormState>();
+
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('グループ名を編集'),
+        content: Form(
+          key: formKey,
+          child: TextFormField(
+            controller: controller,
+            decoration: const InputDecoration(
+              labelText: 'グループ名',
+              border: OutlineInputBorder(),
+            ),
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'グループ名を入力してください';
+              }
+              if (value.trim().length < 2) {
+                return 'グループ名は2文字以上で入力してください';
+              }
+              return null;
+            },
+            autofocus: true,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('キャンセル'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (formKey.currentState!.validate()) {
+                Navigator.pop(context, controller.text.trim());
+              }
+            },
+            child: const Text('保存'),
+          ),
+        ],
+      ),
+    );
+
+    if (newName != null && newName != currentName && context.mounted) {
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId == null) return;
+
+      try {
+        final notifier = ref.read(groupNotifierProvider.notifier);
+        await notifier.updateGroupName(widget.groupId, userId, newName);
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('グループ名を更新しました')),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('エラー: $e')),
+          );
+        }
       }
     }
   }
@@ -250,18 +602,21 @@ class GroupDetailScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Group'),
+        title: const Text('グループを削除'),
         content: const Text(
-          'Are you sure you want to delete this group? This action cannot be undone.',
+          'このグループを削除してもよろしいですか？この操作は取り消せません。',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const Text('キャンセル'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            child: const Text('削除'),
           ),
         ],
       ),
@@ -273,11 +628,11 @@ class GroupDetailScreen extends ConsumerWidget {
 
       try {
         final notifier = ref.read(groupNotifierProvider.notifier);
-        await notifier.deleteGroup(groupId, userId);
+        await notifier.deleteGroup(widget.groupId, userId);
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Group deleted')),
+            const SnackBar(content: Text('グループを削除しました')),
           );
           ref.invalidate(userGroupsProvider);
           context.pop();
@@ -285,7 +640,7 @@ class GroupDetailScreen extends ConsumerWidget {
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+            SnackBar(content: Text('エラー: $e')),
           );
         }
       }
