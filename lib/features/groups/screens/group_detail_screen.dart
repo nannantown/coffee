@@ -179,7 +179,7 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen>
     BuildContext context,
     WidgetRef ref,
     AsyncValue<List<EspressoShot>> shotsAsync,
-  }) {
+  ) {
     return shotsAsync.when(
       data: (shots) {
         if (shots.isEmpty) {
@@ -227,7 +227,7 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen>
     BuildContext context,
     WidgetRef ref,
     AsyncValue<List<EspressoRecipe>> recipesAsync,
-  }) {
+  ) {
     return recipesAsync.when(
       data: (recipes) {
         if (recipes.isEmpty) {

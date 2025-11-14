@@ -1,12 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/espresso_shot.dart';
 import '../services/shot_service.dart';
+import '../services/storage_service.dart';
 import '../../groups/providers/group_provider.dart';
 
 // Shot service provider
 final shotServiceProvider = Provider<ShotService>((ref) {
   final supabase = ref.watch(supabaseClientProvider);
   return ShotService(supabase);
+});
+
+// Storage service provider (for photo uploads)
+final storageServiceProvider = Provider<StorageService>((ref) {
+  final supabase = ref.watch(supabaseClientProvider);
+  return StorageService(supabase);
 });
 
 // グループのショット一覧を取得
