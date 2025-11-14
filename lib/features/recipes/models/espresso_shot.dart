@@ -1,9 +1,8 @@
-class EspressoRecipe {
+class EspressoShot {
   final String id;
   final String groupId;
   final String createdBy;
   final String createdByUsername;
-  final String? sourceShotId;
   final double coffeeWeight;
   final String grinderSetting;
   final int? extractionTime;
@@ -13,16 +12,14 @@ class EspressoRecipe {
   final int tasteRating;
   final String? notes;
   final String? photoUrl;
-  final bool isFavorite;
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  const EspressoRecipe({
+  const EspressoShot({
     required this.id,
     required this.groupId,
     required this.createdBy,
     required this.createdByUsername,
-    this.sourceShotId,
     required this.coffeeWeight,
     required this.grinderSetting,
     this.extractionTime,
@@ -32,18 +29,16 @@ class EspressoRecipe {
     required this.tasteRating,
     this.notes,
     this.photoUrl,
-    required this.isFavorite,
     required this.createdAt,
     required this.updatedAt,
   });
 
-  factory EspressoRecipe.fromJson(Map<String, dynamic> json) {
-    return EspressoRecipe(
+  factory EspressoShot.fromJson(Map<String, dynamic> json) {
+    return EspressoShot(
       id: json['id'] as String,
       groupId: json['group_id'] as String,
       createdBy: json['created_by'] as String,
       createdByUsername: json['created_by_username'] as String? ?? 'Unknown',
-      sourceShotId: json['source_shot_id'] as String?,
       coffeeWeight: (json['coffee_weight'] as num).toDouble(),
       grinderSetting: json['grinder_setting'] as String,
       extractionTime: json['extraction_time'] as int?,
@@ -55,7 +50,6 @@ class EspressoRecipe {
       tasteRating: json['taste_rating'] as int? ?? json['rating'] as int? ?? 3,
       notes: json['notes'] as String?,
       photoUrl: json['photo_url'] as String?,
-      isFavorite: json['is_favorite'] as bool? ?? false,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
@@ -66,7 +60,6 @@ class EspressoRecipe {
       'id': id,
       'group_id': groupId,
       'created_by': createdBy,
-      'source_shot_id': sourceShotId,
       'coffee_weight': coffeeWeight,
       'grinder_setting': grinderSetting,
       'extraction_time': extractionTime,
@@ -76,18 +69,16 @@ class EspressoRecipe {
       'taste_rating': tasteRating,
       'notes': notes,
       'photo_url': photoUrl,
-      'is_favorite': isFavorite,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
   }
 
-  EspressoRecipe copyWith({
+  EspressoShot copyWith({
     String? id,
     String? groupId,
     String? createdBy,
     String? createdByUsername,
-    String? sourceShotId,
     double? coffeeWeight,
     String? grinderSetting,
     int? extractionTime,
@@ -97,16 +88,14 @@ class EspressoRecipe {
     int? tasteRating,
     String? notes,
     String? photoUrl,
-    bool? isFavorite,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
-    return EspressoRecipe(
+    return EspressoShot(
       id: id ?? this.id,
       groupId: groupId ?? this.groupId,
       createdBy: createdBy ?? this.createdBy,
       createdByUsername: createdByUsername ?? this.createdByUsername,
-      sourceShotId: sourceShotId ?? this.sourceShotId,
       coffeeWeight: coffeeWeight ?? this.coffeeWeight,
       grinderSetting: grinderSetting ?? this.grinderSetting,
       extractionTime: extractionTime ?? this.extractionTime,
@@ -116,7 +105,6 @@ class EspressoRecipe {
       tasteRating: tasteRating ?? this.tasteRating,
       notes: notes ?? this.notes,
       photoUrl: photoUrl ?? this.photoUrl,
-      isFavorite: isFavorite ?? this.isFavorite,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

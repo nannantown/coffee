@@ -40,6 +40,7 @@ class RecipeNotifier extends Notifier<AsyncValue<void>> {
   Future<EspressoRecipe?> createRecipe({
     required String groupId,
     required String userId,
+    String? sourceShotId,
     required double coffeeWeight,
     required String grinderSetting,
     int? extractionTime,
@@ -56,6 +57,7 @@ class RecipeNotifier extends Notifier<AsyncValue<void>> {
       final recipe = await recipeService.createRecipe(
         groupId: groupId,
         userId: userId,
+        sourceShotId: sourceShotId,
         coffeeWeight: coffeeWeight,
         grinderSetting: grinderSetting,
         extractionTime: extractionTime,
@@ -139,6 +141,33 @@ class RecipeNotifier extends Notifier<AsyncValue<void>> {
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
       rethrow;
+    }
+  }
+
+  // ショットからレシピを作成
+  Future<EspressoRecipe?> createRecipeFromShot({
+    required String shotId,
+    required String userId,
+    required String groupId,
+    String? additionalNotes,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      final recipeService = ref.read(recipeServiceProvider);
+      final recipe = await recipeService.createRecipeFromShot(
+        shotId: shotId,
+        userId: userId,
+        additionalNotes: additionalNotes,
+      );
+
+      // レシピ一覧を更新
+      ref.invalidate(groupRecipesProvider(groupId));
+
+      state = const AsyncValue.data(null);
+      return recipe;
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      return null;
     }
   }
 }

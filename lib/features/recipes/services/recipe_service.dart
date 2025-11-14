@@ -10,6 +10,7 @@ class RecipeService {
   Future<EspressoRecipe> createRecipe({
     required String groupId,
     required String userId,
+    String? sourceShotId,
     required double coffeeWeight,
     required String grinderSetting,
     int? extractionTime,
@@ -28,6 +29,7 @@ class RecipeService {
           .insert({
             'group_id': groupId,
             'created_by': userId,
+            'source_shot_id': sourceShotId,
             'coffee_weight': coffeeWeight,
             'grinder_setting': grinderSetting,
             'extraction_time': extractionTime,
@@ -182,6 +184,43 @@ class RecipeService {
       print('✅ Recipe favorite toggled: $recipeId -> ${!recipe.isFavorite}');
     } catch (e) {
       print('❌ Error toggling favorite: $e');
+      rethrow;
+    }
+  }
+
+  // ショットからレシピを作成
+  Future<EspressoRecipe> createRecipeFromShot({
+    required String shotId,
+    required String userId,
+    String? additionalNotes,
+  }) async {
+    try {
+      // ショットデータを取得
+      final shot = await _supabase
+          .from('espresso_shots')
+          .select()
+          .eq('id', shotId)
+          .single();
+
+      // レシピとして保存
+      return await createRecipe(
+        groupId: shot['group_id'] as String,
+        userId: userId,
+        sourceShotId: shotId,
+        coffeeWeight: (shot['coffee_weight'] as num).toDouble(),
+        grinderSetting: shot['grinder_setting'] as String,
+        extractionTime: shot['extraction_time'] as int?,
+        roastLevel: shot['roast_level'] != null
+            ? (shot['roast_level'] as num).toDouble()
+            : null,
+        rating: shot['rating'] as int,
+        appearanceRating: shot['appearance_rating'] as int,
+        tasteRating: shot['taste_rating'] as int,
+        notes: additionalNotes ?? shot['notes'] as String?,
+        photoUrl: shot['photo_url'] as String?,
+      );
+    } catch (e) {
+      print('❌ Error creating recipe from shot: $e');
       rethrow;
     }
   }
