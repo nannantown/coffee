@@ -7,8 +7,11 @@ import 'package:share_plus/share_plus.dart';
 import '../providers/group_provider.dart';
 import '../models/group_member.dart';
 import '../../recipes/providers/recipe_provider.dart';
+import '../../recipes/providers/shot_provider.dart';
 import '../../recipes/models/espresso_recipe.dart';
+import '../../recipes/models/espresso_shot.dart';
 import '../../recipes/widgets/recipe_list_item.dart';
+import '../../recipes/widgets/shot_list_item.dart';
 
 class GroupDetailScreen extends ConsumerStatefulWidget {
   final String groupId;
@@ -38,6 +41,7 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen>
   @override
   Widget build(BuildContext context) {
     final groupAsync = ref.watch(groupDetailProvider(widget.groupId));
+    final shotsAsync = ref.watch(groupShotsProvider(widget.groupId));
     final recipesAsync = ref.watch(groupRecipesProvider(widget.groupId));
     final membersAsync = ref.watch(groupMembersProvider(widget.groupId));
 
@@ -140,64 +144,45 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen>
                 error: (_, __) => const SizedBox.shrink(),
               ),
             ),
-            // Recipesヘッダー（固定）
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'レシピ',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  FilledButton.icon(
-                    onPressed: () => context.push('/groups/${widget.groupId}/recipes/create'),
-                    icon: const Icon(Icons.add),
-                    label: const Text('レシピを追加'),
-                  ),
-                ],
-              ),
-            ),
             // タブバー
             TabBar(
               controller: _tabController,
               tabs: const [
-                Tab(text: 'すべて'),
-                Tab(text: 'お気に入り'),
+                Tab(text: 'ショット'),
+                Tab(text: 'レシピ'),
               ],
             ),
-            // タブビュー（レシピリストのみ切り替わる）
+            // タブビュー
             Expanded(
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  // すべてのレシピタブ
-                  _buildRecipeListOnly(context, ref, recipesAsync),
-                  // お気に入りタブ
-                  _buildRecipeListOnly(context, ref, recipesAsync, showFavoritesOnly: true),
+                  // ショットタブ
+                  _buildShotList(context, ref, shotsAsync),
+                  // レシピタブ
+                  _buildRecipeList(context, ref, recipesAsync),
                 ],
               ),
             ),
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.push('/groups/${widget.groupId}/shots/create'),
+        tooltip: 'ショットを記録',
+        child: const Icon(Icons.local_cafe),
+      ),
     );
   }
 
-  Widget _buildRecipeListOnly(
+  Widget _buildShotList(
     BuildContext context,
     WidgetRef ref,
-    AsyncValue<List<EspressoRecipe>> recipesAsync, {
-    bool showFavoritesOnly = false,
+    AsyncValue<List<EspressoShot>> shotsAsync,
   }) {
-    return recipesAsync.when(
-      data: (recipes) {
-        // フィルタリング: お気に入りタブの場合はお気に入りのみ表示
-        final filteredRecipes = showFavoritesOnly
-            ? recipes.where((recipe) => recipe.isFavorite).toList()
-            : recipes;
-
-        if (filteredRecipes.isEmpty) {
+    return shotsAsync.when(
+      data: (shots) {
+        if (shots.isEmpty) {
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(32),
@@ -205,14 +190,19 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    showFavoritesOnly ? Icons.star_border : Icons.coffee_outlined,
+                    Icons.local_cafe,
                     size: 48,
                     color: Colors.grey,
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    showFavoritesOnly ? 'お気に入りのレシピがありません' : 'レシピがありません',
+                    'ショットがありません',
                     style: const TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '右下のボタンからショットを記録しましょう',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                   ),
                 ],
               ),
@@ -222,9 +212,57 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen>
 
         return ListView.builder(
           padding: const EdgeInsets.all(16),
-          itemCount: filteredRecipes.length,
+          itemCount: shots.length,
           itemBuilder: (context, index) {
-            return RecipeListItem(recipe: filteredRecipes[index]);
+            return ShotListItem(shot: shots[index]);
+          },
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(child: Text('エラー: $error')),
+    );
+  }
+
+  Widget _buildRecipeList(
+    BuildContext context,
+    WidgetRef ref,
+    AsyncValue<List<EspressoRecipe>> recipesAsync,
+  }) {
+    return recipesAsync.when(
+      data: (recipes) {
+        if (recipes.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.book_outlined,
+                    size: 48,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'レシピがありません',
+                    style: const TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'ショットをレシピとして保存しましょう',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: recipes.length,
+          itemBuilder: (context, index) {
+            return RecipeListItem(recipe: recipes[index]);
           },
         );
       },

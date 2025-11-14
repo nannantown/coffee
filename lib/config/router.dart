@@ -11,6 +11,8 @@ import '../features/groups/screens/create_group_screen.dart';
 import '../features/groups/screens/join_group_screen.dart';
 import '../features/recipes/screens/create_recipe_screen.dart';
 import '../features/recipes/screens/edit_recipe_screen.dart';
+import '../features/recipes/screens/create_shot_screen.dart';
+import '../features/recipes/screens/edit_shot_screen.dart';
 
 /// アプリ全体のルーティング設定を提供するプロバイダー
 final routerProvider = Provider<GoRouter>((ref) {
@@ -99,6 +101,22 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final recipeId = state.pathParameters['recipeId']!;
           return EditRecipeScreen(recipeId: recipeId);
+        },
+      ),
+      GoRoute(
+        path: '/groups/:groupId/shots/create',
+        name: 'create-shot',
+        builder: (context, state) {
+          final groupId = state.pathParameters['groupId']!;
+          return CreateShotScreen(groupId: groupId);
+        },
+      ),
+      GoRoute(
+        path: '/shots/:shotId/edit',
+        name: 'edit-shot',
+        builder: (context, state) {
+          final shotId = state.pathParameters['shotId']!;
+          return EditShotScreen(shotId: shotId);
         },
       ),
     ],
