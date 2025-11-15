@@ -3,6 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import '../../../core/utils/image_picker_util.dart';
+import 'common/coffee_weight_slider.dart';
+import 'common/grinder_setting_slider.dart';
+import 'common/roast_level_slider.dart';
+import 'common/notes_field.dart';
 
 class ShotForm extends StatefulWidget {
   final GlobalKey<FormState> formKey;
@@ -186,26 +190,16 @@ class _ShotFormState extends State<ShotForm> {
         padding: const EdgeInsets.all(16),
         children: [
           // Coffee weight slider
-          Text('コーヒー豆: ${widget.coffeeWeight.toStringAsFixed(1)}g',
-            style: const TextStyle(fontSize: 16)),
-          Slider(
+          CoffeeWeightSlider(
             value: widget.coffeeWeight,
-            min: 10.0,
-            max: 30.0,
-            label: '${widget.coffeeWeight.toStringAsFixed(1)}g',
             onChanged: widget.onCoffeeWeightChanged,
           ),
           const SizedBox(height: 8),
 
           // Grinder setting slider
-          Text('グラインダーセッティング: ${widget.grinderSetting}',
-            style: const TextStyle(fontSize: 16)),
-          Slider(
-            value: widget.grinderSetting.toDouble(),
-            min: 140.0,
-            max: 350.0,
-            label: '${widget.grinderSetting}',
-            onChanged: (value) => widget.onGrinderSettingChanged(value.round()),
+          GrinderSettingSlider(
+            value: widget.grinderSetting,
+            onChanged: widget.onGrinderSettingChanged,
           ),
           const SizedBox(height: 8),
 
@@ -285,43 +279,9 @@ class _ShotFormState extends State<ShotForm> {
           const SizedBox(height: 24),
 
           // Roast level slider
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '焙煎レベル: ${(widget.roastLevel * 100).toInt()}%',
-                style: const TextStyle(fontSize: 16),
-              ),
-              Text(
-                _getRoastLevelName(widget.roastLevel),
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: _getRoastColor(widget.roastLevel),
-                ),
-              ),
-            ],
-          ),
-          SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              activeTrackColor: _getRoastColor(widget.roastLevel),
-              thumbColor: _getRoastColor(widget.roastLevel),
-              inactiveTrackColor: _getRoastColor(widget.roastLevel).withValues(alpha: 0.3),
-            ),
-            child: Slider(
-              value: widget.roastLevel,
-              min: 0.0,
-              max: 1.0,
-              onChanged: widget.onRoastLevelChanged,
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('ライト', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-              Text('ミディアム', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-              Text('ダーク', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-            ],
+          RoastLevelSlider(
+            value: widget.roastLevel,
+            onChanged: widget.onRoastLevelChanged,
           ),
           const SizedBox(height: 24),
 
@@ -376,17 +336,7 @@ class _ShotFormState extends State<ShotForm> {
 
           // Notes (Comment)
           if (widget.notesController != null) ...[
-            const Text('コメント（任意）', style: TextStyle(fontSize: 16)),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: widget.notesController,
-              decoration: const InputDecoration(
-                hintText: '味の感想、改善点など',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-              keyboardType: TextInputType.multiline,
-            ),
+            NotesField(controller: widget.notesController!),
             const SizedBox(height: 24),
           ],
 
@@ -439,17 +389,5 @@ class _ShotFormState extends State<ShotForm> {
         ],
       ),
     );
-  }
-
-  String _getRoastLevelName(double level) {
-    if (level < 0.33) return 'ライトロースト';
-    if (level < 0.66) return 'ミディアムロースト';
-    return 'ダークロースト';
-  }
-
-  Color _getRoastColor(double level) {
-    if (level < 0.33) return Colors.brown[300]!;
-    if (level < 0.66) return Colors.brown[500]!;
-    return Colors.brown[800]!;
   }
 }
