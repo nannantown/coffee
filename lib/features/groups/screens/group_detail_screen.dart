@@ -167,10 +167,22 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen>
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/groups/${widget.groupId}/shots/create'),
-        tooltip: 'ショットを記録',
-        child: const Icon(Icons.local_cafe),
+      floatingActionButton: ListenableBuilder(
+        listenable: _tabController,
+        builder: (context, child) {
+          final isShots = _tabController.index == 0;
+          return FloatingActionButton(
+            onPressed: () {
+              if (isShots) {
+                context.push('/groups/${widget.groupId}/shots/create');
+              } else {
+                context.push('/groups/${widget.groupId}/recipes/create');
+              }
+            },
+            tooltip: isShots ? 'ショットを記録' : 'レシピを作成',
+            child: Icon(isShots ? Icons.local_cafe : Icons.receipt_long),
+          );
+        },
       ),
     );
   }
