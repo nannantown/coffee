@@ -40,15 +40,22 @@ class RecipeListItem extends ConsumerWidget {
               const SizedBox(height: 8),
               // Roast level
               if (recipe.roastLevel != null) ...[
-                Text(
-                  '焙煎度: ${_getRoastLevelName(recipe.roastLevel!)}',
-                  style: TextStyle(
-                    fontSize: 13,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
                     color: _getRoastColor(recipe.roastLevel!),
-                    fontWeight: FontWeight.w500,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    '焙煎度: ${_getRoastLevelName(recipe.roastLevel!)}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: _getRoastTextColor(recipe.roastLevel!),
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
               ],
               // Coffee weight and grinder setting
               Text(
@@ -91,5 +98,14 @@ class RecipeListItem extends ConsumerWidget {
     if (level < 0.33) return Colors.brown[300]!;
     if (level < 0.66) return Colors.brown[500]!;
     return Colors.brown[800]!;
+  }
+
+  Color _getRoastTextColor(double level) {
+    // Light roast (brown[300]) - use dark text
+    if (level < 0.33) return Colors.brown[900]!;
+    // Medium roast (brown[500]) - use white text
+    if (level < 0.66) return Colors.white;
+    // Dark roast (brown[800]) - use white text
+    return Colors.white;
   }
 }
