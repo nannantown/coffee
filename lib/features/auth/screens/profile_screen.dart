@@ -7,6 +7,8 @@ import '../providers/profile_provider.dart';
 import '../providers/auth_provider.dart';
 import '../../../core/services/storage_service.dart';
 import '../../../core/utils/image_picker_util.dart';
+import '../../../core/widgets/image_picker_avatar.dart';
+import '../../../core/widgets/editable_field_card.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -161,56 +163,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               children: [
                 const SizedBox(height: 32),
                 // Profile Avatar
-                Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                      backgroundImage: profile['avatar_url'] != null
-                          ? NetworkImage(profile['avatar_url'] as String)
-                          : null,
-                      child: profile['avatar_url'] == null
-                          ? Text(
-                              (profile['username'] as String?)?.isNotEmpty == true
-                                  ? (profile['username'] as String)[0].toUpperCase()
-                                  : '?',
-                              style: TextStyle(
-                                fontSize: 40,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onPrimaryContainer,
-                              ),
-                            )
-                          : null,
-                    ),
-                    if (_isUploadingAvatar)
-                      Positioned.fill(
-                        child: CircleAvatar(
-                          radius: 50,
-                          backgroundColor: Colors.black54,
-                          child: const CircularProgressIndicator(color: Colors.white),
-                        ),
-                      ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Material(
-                        color: Theme.of(context).colorScheme.primary,
-                        shape: const CircleBorder(),
-                        child: InkWell(
-                          onTap: _isUploadingAvatar ? null : _pickAndUploadAvatar,
-                          customBorder: const CircleBorder(),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: Icon(
-                              Icons.camera_alt,
-                              size: 20,
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                ImagePickerAvatar(
+                  imageUrl: profile['avatar_url'] as String?,
+                  fallbackText: profile['username'] as String?,
+                  isUploading: _isUploadingAvatar,
+                  onTap: _pickAndUploadAvatar,
                 ),
                 const SizedBox(height: 16),
                 // Email
@@ -225,77 +182,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 // Username Section
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'ユーザー名',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              if (!_isEditing)
-                                IconButton(
-                                  icon: const Icon(Icons.edit),
-                                  onPressed: () => setState(() => _isEditing = true),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          if (_isEditing)
-                            Form(
-                              key: _formKey,
-                              child: Column(
-                                children: [
-                                  TextFormField(
-                                    controller: _usernameController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'ユーザー名',
-                                      border: OutlineInputBorder(),
-                                      hintText: 'ユーザー名を入力',
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.trim().isEmpty) {
-                                        return 'ユーザー名を入力してください';
-                                      }
-                                      if (value.trim().length < 2) {
-                                        return 'ユーザー名は2文字以上で入力してください';
-                                      }
-                                      return null;
-                                    },
-                                    enabled: !_isLoading,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: FilledButton(
-                                      onPressed: _isLoading ? null : _updateUsername,
-                                      child: _isLoading
-                                          ? const SizedBox(
-                                              height: 20,
-                                              width: 20,
-                                              child: CircularProgressIndicator(strokeWidth: 2),
-                                            )
-                                          : const Text('保存'),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          else
-                            Text(
-                              profile['username'] ?? '',
-                              style: const TextStyle(fontSize: 18),
-                            ),
-                        ],
-                      ),
+                  child: Form(
+                    key: _formKey,
+                    child: EditableFieldCard(
+                      title: 'ユーザー名',
+                      value: profile['username'] ?? '',
+                      isEditing: _isEditing,
+                      controller: _usernameController,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'ユーザー名を入力してください';
+                        }
+                        if (value.trim().length < 2) {
+                          return 'ユーザー名は2文字以上で入力してください';
+                        }
+                        return null;
+                      },
+                      onEdit: () => setState(() => _isEditing = true),
+                      onSave: _updateUsername,
+                      isLoading: _isLoading,
+                      labelText: 'ユーザー名',
+                      hintText: 'ユーザー名を入力',
                     ),
                   ),
                 ),
