@@ -12,16 +12,14 @@ class ShotForm extends StatefulWidget {
   final TextEditingController? notesController;
   final double roastLevel;
   final int rating;
-  final int appearanceRating;
-  final int tasteRating;
+  final String extractionSpeed;
   final File? selectedImage;
   final Function(double) onCoffeeWeightChanged;
   final Function(int) onGrinderSettingChanged;
   final Function(int) onExtractionTimeChanged;
   final Function(double) onRoastLevelChanged;
   final Function(int) onRatingChanged;
-  final Function(int) onAppearanceRatingChanged;
-  final Function(int) onTasteRatingChanged;
+  final Function(String) onExtractionSpeedChanged;
   final Function(File?) onImageSelected;
 
   const ShotForm({
@@ -33,16 +31,14 @@ class ShotForm extends StatefulWidget {
     this.notesController,
     required this.roastLevel,
     required this.rating,
-    required this.appearanceRating,
-    required this.tasteRating,
+    required this.extractionSpeed,
     this.selectedImage,
     required this.onCoffeeWeightChanged,
     required this.onGrinderSettingChanged,
     required this.onExtractionTimeChanged,
     required this.onRoastLevelChanged,
     required this.onRatingChanged,
-    required this.onAppearanceRatingChanged,
-    required this.onTasteRatingChanged,
+    required this.onExtractionSpeedChanged,
     required this.onImageSelected,
   });
 
@@ -329,39 +325,51 @@ class _ShotFormState extends State<ShotForm> {
           ),
           const SizedBox(height: 24),
 
-          // Appearance Rating
-          const Text('見た目評価', style: TextStyle(fontSize: 16)),
+          // Extraction Rating
+          const Text('抽出評価', style: TextStyle(fontSize: 16)),
           const SizedBox(height: 8),
           Row(
             children: List.generate(5, (index) {
               final starValue = index + 1;
               return IconButton(
                 icon: Icon(
-                  starValue <= widget.appearanceRating ? Icons.star : Icons.star_border,
+                  starValue <= widget.rating ? Icons.star : Icons.star_border,
                   color: Colors.amber,
                   size: 32,
                 ),
-                onPressed: () => widget.onAppearanceRatingChanged(starValue),
+                onPressed: () => widget.onRatingChanged(starValue),
               );
             }),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
 
-          // Taste Rating
-          const Text('味評価', style: TextStyle(fontSize: 16)),
+          // Extraction Speed
+          const Text('抽出速度', style: TextStyle(fontSize: 16)),
           const SizedBox(height: 8),
           Row(
-            children: List.generate(5, (index) {
-              final starValue = index + 1;
-              return IconButton(
-                icon: Icon(
-                  starValue <= widget.tasteRating ? Icons.star : Icons.star_border,
-                  color: Colors.amber,
-                  size: 32,
-                ),
-                onPressed: () => widget.onTasteRatingChanged(starValue),
-              );
-            }),
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Radio<String>(
+                value: 'too_slow',
+                groupValue: widget.extractionSpeed,
+                onChanged: (value) => widget.onExtractionSpeedChanged(value!),
+              ),
+              const Text('遅すぎ'),
+              const SizedBox(width: 16),
+              Radio<String>(
+                value: 'optimal',
+                groupValue: widget.extractionSpeed,
+                onChanged: (value) => widget.onExtractionSpeedChanged(value!),
+              ),
+              const Text('最適'),
+              const SizedBox(width: 16),
+              Radio<String>(
+                value: 'too_fast',
+                groupValue: widget.extractionSpeed,
+                onChanged: (value) => widget.onExtractionSpeedChanged(value!),
+              ),
+              const Text('速すぎ'),
+            ],
           ),
           const SizedBox(height: 24),
 

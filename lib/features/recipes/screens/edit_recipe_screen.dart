@@ -25,8 +25,8 @@ class _EditRecipeScreenState extends ConsumerState<EditRecipeScreen> {
   int _extractionTime = 30;
   double _roastLevel = 0.5;
   int _rating = 3;
-  int _appearanceRating = 3;
-  int _tasteRating = 3;
+  String _extractionSpeed = 'optimal';
+  
   File? _selectedImage;
   String? _existingPhotoUrl;
   bool _isLoading = false;
@@ -40,8 +40,8 @@ class _EditRecipeScreenState extends ConsumerState<EditRecipeScreen> {
     _notesController.text = recipe.notes ?? '';
     _roastLevel = recipe.roastLevel ?? 0.5;
     _rating = recipe.rating;
-    _appearanceRating = recipe.appearanceRating;
-    _tasteRating = recipe.tasteRating;
+    _extractionSpeed = recipe.extractionSpeed;
+    
     _existingPhotoUrl = recipe.photoUrl;
     _isInitialized = true;
   }
@@ -89,8 +89,8 @@ class _EditRecipeScreenState extends ConsumerState<EditRecipeScreen> {
         extractionTime: _extractionTime,
         roastLevel: _roastLevel,
         rating: _rating,
-        appearanceRating: _appearanceRating,
-        tasteRating: _tasteRating,
+        extractionSpeed: _extractionSpeed,
+        
         notes: _notesController.text.isNotEmpty ? _notesController.text : null,
         photoUrl: photoUrl,
       );
@@ -141,16 +141,16 @@ class _EditRecipeScreenState extends ConsumerState<EditRecipeScreen> {
             notesController: _notesController,
             roastLevel: _roastLevel,
             rating: _rating,
-            appearanceRating: _appearanceRating,
-            tasteRating: _tasteRating,
+            extractionSpeed: _extractionSpeed,
+            
             selectedImage: _selectedImage,
             onCoffeeWeightChanged: (value) => setState(() => _coffeeWeight = value),
             onGrinderSettingChanged: (value) => setState(() => _grinderSetting = value),
             onExtractionTimeChanged: (value) => setState(() => _extractionTime = value),
             onRoastLevelChanged: (value) => setState(() => _roastLevel = value),
             onRatingChanged: (value) => setState(() => _rating = value),
-            onAppearanceRatingChanged: (value) => setState(() => _appearanceRating = value),
-            onTasteRatingChanged: (value) => setState(() => _tasteRating = value),
+            onExtractionSpeedChanged: (value) => setState(() => _extractionSpeed = value),
+            
             onImageSelected: (image) => setState(() => _selectedImage = image),
           );
         },

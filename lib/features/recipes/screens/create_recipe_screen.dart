@@ -24,8 +24,8 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
   int _extractionTime = 0;
   double _roastLevel = 0.5;
   int _rating = 3;
-  int _appearanceRating = 3;
-  int _tasteRating = 3;
+  String _extractionSpeed = 'optimal';
+  
   File? _selectedImage;
   bool _isLoading = false;
 
@@ -63,8 +63,8 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
         extractionTime: _extractionTime,
         roastLevel: _roastLevel,
         rating: _rating,
-        appearanceRating: _appearanceRating,
-        tasteRating: _tasteRating,
+        extractionSpeed: _extractionSpeed,
+        
         notes: _notesController.text.isNotEmpty ? _notesController.text : null,
         photoUrl: photoUrl,
       );
@@ -104,16 +104,16 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
         notesController: _notesController,
         roastLevel: _roastLevel,
         rating: _rating,
-        appearanceRating: _appearanceRating,
-        tasteRating: _tasteRating,
+        extractionSpeed: _extractionSpeed,
+        
         selectedImage: _selectedImage,
         onCoffeeWeightChanged: (value) => setState(() => _coffeeWeight = value),
         onGrinderSettingChanged: (value) => setState(() => _grinderSetting = value),
         onExtractionTimeChanged: (value) => setState(() => _extractionTime = value),
         onRoastLevelChanged: (value) => setState(() => _roastLevel = value),
         onRatingChanged: (value) => setState(() => _rating = value),
-        onAppearanceRatingChanged: (value) => setState(() => _appearanceRating = value),
-        onTasteRatingChanged: (value) => setState(() => _tasteRating = value),
+        onExtractionSpeedChanged: (value) => setState(() => _extractionSpeed = value),
+        
         onImageSelected: (image) => setState(() => _selectedImage = image),
       ),
       bottomNavigationBar: SafeArea(
