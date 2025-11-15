@@ -7,6 +7,7 @@ import '../features/auth/screens/signup_screen.dart';
 import '../features/auth/screens/profile_screen.dart';
 import '../features/groups/screens/groups_list_screen.dart';
 import '../features/groups/screens/group_detail_screen.dart';
+import '../features/groups/screens/group_settings_screen.dart';
 import '../features/groups/screens/create_group_screen.dart';
 import '../features/groups/screens/join_group_screen.dart';
 import '../features/recipes/screens/create_recipe_screen.dart';
@@ -87,6 +88,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final groupId = state.pathParameters['groupId']!;
           return GroupDetailScreen(groupId: groupId);
+        },
+      ),
+      GoRoute(
+        path: '/groups/:groupId/settings',
+        name: 'group-settings',
+        builder: (context, state) {
+          final groupId = state.pathParameters['groupId']!;
+          return GroupSettingsScreen(groupId: groupId);
         },
       ),
       GoRoute(
