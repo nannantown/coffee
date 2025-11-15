@@ -45,8 +45,7 @@ class ShotNotifier extends Notifier<AsyncValue<void>> {
     int? extractionTime,
     double? roastLevel,
     required int rating,
-    required int appearanceRating,
-    required int tasteRating,
+    required String extractionSpeed,
     String? notes,
     String? photoUrl,
   }) async {
@@ -61,8 +60,7 @@ class ShotNotifier extends Notifier<AsyncValue<void>> {
         extractionTime: extractionTime,
         roastLevel: roastLevel,
         rating: rating,
-        appearanceRating: appearanceRating,
-        tasteRating: tasteRating,
+        extractionSpeed: extractionSpeed,
         notes: notes,
         photoUrl: photoUrl,
       );
@@ -82,8 +80,7 @@ class ShotNotifier extends Notifier<AsyncValue<void>> {
     int? extractionTime,
     double? roastLevel,
     int? rating,
-    int? appearanceRating,
-    int? tasteRating,
+    String? extractionSpeed,
     String? notes,
     String? photoUrl,
   }) async {
@@ -98,8 +95,7 @@ class ShotNotifier extends Notifier<AsyncValue<void>> {
         extractionTime: extractionTime,
         roastLevel: roastLevel,
         rating: rating,
-        appearanceRating: appearanceRating,
-        tasteRating: tasteRating,
+        extractionSpeed: extractionSpeed,
         notes: notes,
         photoUrl: photoUrl,
       );

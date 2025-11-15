@@ -9,8 +9,7 @@ class EspressoRecipe {
   final int? extractionTime;
   final double? roastLevel;
   final int rating;
-  final int appearanceRating;
-  final int tasteRating;
+  final String extractionSpeed;
   final String? notes;
   final String? photoUrl;
   final bool isFavorite;
@@ -28,8 +27,7 @@ class EspressoRecipe {
     this.extractionTime,
     this.roastLevel,
     required this.rating,
-    required this.appearanceRating,
-    required this.tasteRating,
+    required this.extractionSpeed,
     this.notes,
     this.photoUrl,
     required this.isFavorite,
@@ -51,8 +49,7 @@ class EspressoRecipe {
           ? (json['roast_level'] as num).toDouble()
           : null,
       rating: json['rating'] as int? ?? 3,
-      appearanceRating: json['appearance_rating'] as int? ?? json['rating'] as int? ?? 3,
-      tasteRating: json['taste_rating'] as int? ?? json['rating'] as int? ?? 3,
+      extractionSpeed: json['extraction_speed'] as String? ?? 'optimal',
       notes: json['notes'] as String?,
       photoUrl: json['photo_url'] as String?,
       isFavorite: json['is_favorite'] as bool? ?? false,
@@ -72,8 +69,7 @@ class EspressoRecipe {
       'extraction_time': extractionTime,
       'roast_level': roastLevel,
       'rating': rating,
-      'appearance_rating': appearanceRating,
-      'taste_rating': tasteRating,
+      'extraction_speed': extractionSpeed,
       'notes': notes,
       'photo_url': photoUrl,
       'is_favorite': isFavorite,
@@ -93,8 +89,7 @@ class EspressoRecipe {
     int? extractionTime,
     double? roastLevel,
     int? rating,
-    int? appearanceRating,
-    int? tasteRating,
+    String? extractionSpeed,
     String? notes,
     String? photoUrl,
     bool? isFavorite,
@@ -112,8 +107,7 @@ class EspressoRecipe {
       extractionTime: extractionTime ?? this.extractionTime,
       roastLevel: roastLevel ?? this.roastLevel,
       rating: rating ?? this.rating,
-      appearanceRating: appearanceRating ?? this.appearanceRating,
-      tasteRating: tasteRating ?? this.tasteRating,
+      extractionSpeed: extractionSpeed ?? this.extractionSpeed,
       notes: notes ?? this.notes,
       photoUrl: photoUrl ?? this.photoUrl,
       isFavorite: isFavorite ?? this.isFavorite,

@@ -15,8 +15,7 @@ class ShotService {
     int? extractionTime,
     double? roastLevel,
     required int rating,
-    required int appearanceRating,
-    required int tasteRating,
+    required String extractionSpeed,
     String? notes,
     String? photoUrl,
   }) async {
@@ -33,8 +32,7 @@ class ShotService {
             'extraction_time': extractionTime,
             'roast_level': roastLevel,
             'rating': rating,
-            'appearance_rating': appearanceRating,
-            'taste_rating': tasteRating,
+            'extraction_speed': extractionSpeed,
             'notes': notes,
             'photo_url': photoUrl,
             'created_at': now,
@@ -102,8 +100,7 @@ class ShotService {
     int? extractionTime,
     double? roastLevel,
     int? rating,
-    int? appearanceRating,
-    int? tasteRating,
+    String? extractionSpeed,
     String? notes,
     String? photoUrl,
   }) async {
@@ -125,8 +122,7 @@ class ShotService {
       if (extractionTime != null) updateData['extraction_time'] = extractionTime;
       if (roastLevel != null) updateData['roast_level'] = roastLevel;
       if (rating != null) updateData['rating'] = rating;
-      if (appearanceRating != null) updateData['appearance_rating'] = appearanceRating;
-      if (tasteRating != null) updateData['taste_rating'] = tasteRating;
+      if (extractionSpeed != null) updateData['extraction_speed'] = extractionSpeed;
       if (notes != null) updateData['notes'] = notes;
       if (photoUrl != null) updateData['photo_url'] = photoUrl;
 
