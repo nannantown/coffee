@@ -126,20 +126,6 @@ class RecipeNotifier extends Notifier<AsyncValue<void>> {
     }
   }
 
-  Future<void> toggleFavorite(String recipeId, String groupId) async {
-    try {
-      final recipeService = ref.read(recipeServiceProvider);
-      await recipeService.toggleFavorite(recipeId);
-
-      // レシピ一覧を更新
-      ref.invalidate(groupRecipesProvider(groupId));
-      ref.invalidate(recipeDetailProvider(recipeId));
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
-      rethrow;
-    }
-  }
-
   // ショットからレシピを作成
   Future<EspressoRecipe?> createRecipeFromShot({
     required String shotId,
