@@ -179,15 +179,19 @@ class RecipeListItem extends ConsumerWidget {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text('見た目: ', style: TextStyle(fontSize: 12)),
-                          _buildRatingStars(recipe.appearanceRating),
+                          const Text('抽出: ', style: TextStyle(fontSize: 12)),
+                          _buildRatingStars(recipe.rating),
                         ],
                       ),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text('味: ', style: TextStyle(fontSize: 12)),
-                          _buildRatingStars(recipe.tasteRating),
+                          const Text('速度: ', style: TextStyle(fontSize: 12)),
+                          Text(
+                            recipe.extractionSpeed == 'too_slow' ? '遅すぎ' :
+                            recipe.extractionSpeed == 'too_fast' ? '速すぎ' : '最適',
+                            style: const TextStyle(fontSize: 12),
+                          ),
                         ],
                       ),
                     ],

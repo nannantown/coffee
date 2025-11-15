@@ -157,7 +157,7 @@ class ShotListItem extends ConsumerWidget {
                       ],
                     ),
                   ],
-                  // Dual Ratings
+                  // Extraction Rating and Speed
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -166,15 +166,19 @@ class ShotListItem extends ConsumerWidget {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text('見た目: ', style: TextStyle(fontSize: 12)),
-                          _buildRatingStars(shot.appearanceRating),
+                          const Text('抽出: ', style: TextStyle(fontSize: 12)),
+                          _buildRatingStars(shot.rating),
                         ],
                       ),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text('味: ', style: TextStyle(fontSize: 12)),
-                          _buildRatingStars(shot.tasteRating),
+                          const Text('速度: ', style: TextStyle(fontSize: 12)),
+                          Text(
+                            shot.extractionSpeed == 'too_slow' ? '遅すぎ' :
+                            shot.extractionSpeed == 'too_fast' ? '速すぎ' : '最適',
+                            style: const TextStyle(fontSize: 12),
+                          ),
                         ],
                       ),
                     ],

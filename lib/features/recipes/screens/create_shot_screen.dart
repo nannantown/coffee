@@ -110,7 +110,7 @@ class _CreateShotScreenState extends ConsumerState<CreateShotScreen> {
         onRoastLevelChanged: (value) => setState(() => _roastLevel = value),
         onRatingChanged: (value) => setState(() => _rating = value),
         onExtractionSpeedChanged: (value) => setState(() => _extractionSpeed = value),
-        onImageSelected: (image) => setState(() => _selectedImage = value),
+        onImageSelected: (image) => setState(() => _selectedImage = image),
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
