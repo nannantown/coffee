@@ -3,6 +3,8 @@ class EspressoRecipe {
   final String groupId;
   final String createdBy;
   final String createdByUsername;
+  final String updatedBy;
+  final String updatedByUsername;
   final String? sourceShotId;
   final double coffeeWeight;
   final String grinderSetting;
@@ -12,7 +14,6 @@ class EspressoRecipe {
   final String extractionSpeed;
   final String? notes;
   final String? photoUrl;
-  final bool isFavorite;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -21,6 +22,8 @@ class EspressoRecipe {
     required this.groupId,
     required this.createdBy,
     required this.createdByUsername,
+    required this.updatedBy,
+    required this.updatedByUsername,
     this.sourceShotId,
     required this.coffeeWeight,
     required this.grinderSetting,
@@ -30,7 +33,6 @@ class EspressoRecipe {
     required this.extractionSpeed,
     this.notes,
     this.photoUrl,
-    required this.isFavorite,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -41,6 +43,8 @@ class EspressoRecipe {
       groupId: json['group_id'] as String,
       createdBy: json['created_by'] as String,
       createdByUsername: json['created_by_username'] as String? ?? 'Unknown',
+      updatedBy: json['updated_by'] as String,
+      updatedByUsername: json['updated_by_username'] as String? ?? 'Unknown',
       sourceShotId: json['source_shot_id'] as String?,
       coffeeWeight: (json['coffee_weight'] as num).toDouble(),
       grinderSetting: json['grinder_setting'] as String,
@@ -52,7 +56,6 @@ class EspressoRecipe {
       extractionSpeed: json['extraction_speed'] as String? ?? 'optimal',
       notes: json['notes'] as String?,
       photoUrl: json['photo_url'] as String?,
-      isFavorite: json['is_favorite'] as bool? ?? false,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
@@ -63,6 +66,7 @@ class EspressoRecipe {
       'id': id,
       'group_id': groupId,
       'created_by': createdBy,
+      'updated_by': updatedBy,
       'source_shot_id': sourceShotId,
       'coffee_weight': coffeeWeight,
       'grinder_setting': grinderSetting,
@@ -72,7 +76,6 @@ class EspressoRecipe {
       'extraction_speed': extractionSpeed,
       'notes': notes,
       'photo_url': photoUrl,
-      'is_favorite': isFavorite,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
@@ -83,6 +86,8 @@ class EspressoRecipe {
     String? groupId,
     String? createdBy,
     String? createdByUsername,
+    String? updatedBy,
+    String? updatedByUsername,
     String? sourceShotId,
     double? coffeeWeight,
     String? grinderSetting,
@@ -92,7 +97,6 @@ class EspressoRecipe {
     String? extractionSpeed,
     String? notes,
     String? photoUrl,
-    bool? isFavorite,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -101,6 +105,8 @@ class EspressoRecipe {
       groupId: groupId ?? this.groupId,
       createdBy: createdBy ?? this.createdBy,
       createdByUsername: createdByUsername ?? this.createdByUsername,
+      updatedBy: updatedBy ?? this.updatedBy,
+      updatedByUsername: updatedByUsername ?? this.updatedByUsername,
       sourceShotId: sourceShotId ?? this.sourceShotId,
       coffeeWeight: coffeeWeight ?? this.coffeeWeight,
       grinderSetting: grinderSetting ?? this.grinderSetting,
@@ -110,7 +116,6 @@ class EspressoRecipe {
       extractionSpeed: extractionSpeed ?? this.extractionSpeed,
       notes: notes ?? this.notes,
       photoUrl: photoUrl ?? this.photoUrl,
-      isFavorite: isFavorite ?? this.isFavorite,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
