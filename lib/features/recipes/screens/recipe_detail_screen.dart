@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/espresso_recipe.dart';
 import '../providers/recipe_provider.dart';
+import '../widgets/roast_level_label.dart';
 
 class RecipeDetailScreen extends ConsumerWidget {
   final String recipeId;
@@ -143,52 +144,21 @@ class RecipeDetailScreen extends ConsumerWidget {
   Widget _buildRoastLevel(double level, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '焙煎度',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                _getRoastLevelName(level),
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: _getRoastColor(level),
-                ),
-              ),
-            ],
+          Text(
+            '焙煎度',
+            style: TextStyle(
+              fontSize: 16,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-          const SizedBox(height: 8),
-          LinearProgressIndicator(
-            value: level,
-            backgroundColor: Colors.grey[300],
-            valueColor: AlwaysStoppedAnimation(_getRoastColor(level)),
-            minHeight: 8,
-          ),
+          RoastLevelLabel(roastLevel: level, showLabel: false),
         ],
       ),
     );
-  }
-
-  String _getRoastLevelName(double level) {
-    if (level < 0.33) return 'ライトロースト';
-    if (level < 0.66) return 'ミディアムロースト';
-    return 'ダークロースト';
-  }
-
-  Color _getRoastColor(double level) {
-    if (level < 0.33) return Colors.brown[300]!;
-    if (level < 0.66) return Colors.brown[500]!;
-    return Colors.brown[800]!;
   }
 
   String _formatDate(DateTime date) {

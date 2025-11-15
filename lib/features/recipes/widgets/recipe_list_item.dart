@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../models/espresso_recipe.dart';
+import 'roast_level_label.dart';
 
 class RecipeListItem extends ConsumerWidget {
   final EspressoRecipe recipe;
@@ -40,21 +41,7 @@ class RecipeListItem extends ConsumerWidget {
               const SizedBox(height: 8),
               // Roast level
               if (recipe.roastLevel != null) ...[
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: _getRoastColor(recipe.roastLevel!),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    '焙煎度: ${_getRoastLevelName(recipe.roastLevel!)}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: _getRoastTextColor(recipe.roastLevel!),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
+                RoastLevelLabel(roastLevel: recipe.roastLevel!),
                 const SizedBox(height: 8),
               ],
               // Coffee weight and grinder setting
@@ -86,26 +73,5 @@ class RecipeListItem extends ConsumerWidget {
     final minute = date.minute.toString().padLeft(2, '0');
 
     return '$month/$day $hour:$minute';
-  }
-
-  String _getRoastLevelName(double level) {
-    if (level < 0.33) return 'ライトロースト';
-    if (level < 0.66) return 'ミディアムロースト';
-    return 'ダークロースト';
-  }
-
-  Color _getRoastColor(double level) {
-    if (level < 0.33) return Colors.brown[300]!;
-    if (level < 0.66) return Colors.brown[500]!;
-    return Colors.brown[800]!;
-  }
-
-  Color _getRoastTextColor(double level) {
-    // Light roast (brown[300]) - use dark text
-    if (level < 0.33) return Colors.brown[900]!;
-    // Medium roast (brown[500]) - use white text
-    if (level < 0.66) return Colors.white;
-    // Dark roast (brown[800]) - use white text
-    return Colors.white;
   }
 }
