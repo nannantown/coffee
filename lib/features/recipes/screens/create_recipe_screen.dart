@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../providers/recipe_provider.dart';
 import '../widgets/recipe_form.dart';
+import '../../../core/widgets/primary_action_button.dart';
 
 class CreateRecipeScreen extends ConsumerStatefulWidget {
   final String groupId;
@@ -98,19 +99,10 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: FilledButton(
-            onPressed: _isLoading ? null : _createRecipe,
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            child: _isLoading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('レシピを作成'),
+          child: PrimaryActionButton(
+            onPressed: _createRecipe,
+            label: 'レシピを作成',
+            isLoading: _isLoading,
           ),
         ),
       ),

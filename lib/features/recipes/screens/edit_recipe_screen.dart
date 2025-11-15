@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/espresso_recipe.dart';
 import '../providers/recipe_provider.dart';
 import '../widgets/recipe_form.dart';
+import '../../../core/widgets/primary_action_button.dart';
 
 class EditRecipeScreen extends ConsumerStatefulWidget {
   final String recipeId;
@@ -123,19 +124,10 @@ class _EditRecipeScreenState extends ConsumerState<EditRecipeScreen> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: FilledButton(
-            onPressed: _isLoading ? null : _updateRecipe,
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            child: _isLoading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('更新'),
+          child: PrimaryActionButton(
+            onPressed: _updateRecipe,
+            label: '更新',
+            isLoading: _isLoading,
           ),
         ),
       ),

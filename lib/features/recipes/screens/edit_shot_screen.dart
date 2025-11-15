@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/espresso_shot.dart';
 import '../providers/shot_provider.dart';
 import '../widgets/shot_form.dart';
+import '../../../core/widgets/primary_action_button.dart';
 
 class EditShotScreen extends ConsumerStatefulWidget {
   final String shotId;
@@ -155,19 +156,10 @@ class _EditShotScreenState extends ConsumerState<EditShotScreen> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: FilledButton(
-            onPressed: _isLoading ? null : _updateShot,
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            child: _isLoading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('更新'),
+          child: PrimaryActionButton(
+            onPressed: _updateShot,
+            label: '更新',
+            isLoading: _isLoading,
           ),
         ),
       ),

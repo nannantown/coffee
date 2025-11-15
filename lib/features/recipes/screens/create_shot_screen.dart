@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../providers/shot_provider.dart';
 import '../widgets/shot_form.dart';
+import '../../../core/widgets/primary_action_button.dart';
 
 class CreateShotScreen extends ConsumerStatefulWidget {
   final String groupId;
@@ -115,19 +116,10 @@ class _CreateShotScreenState extends ConsumerState<CreateShotScreen> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: FilledButton(
-            onPressed: _isLoading ? null : _createShot,
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            child: _isLoading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('ショットを記録'),
+          child: PrimaryActionButton(
+            onPressed: _createShot,
+            label: 'ショットを記録',
+            isLoading: _isLoading,
           ),
         ),
       ),
