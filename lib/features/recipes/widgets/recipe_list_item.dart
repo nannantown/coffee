@@ -38,6 +38,18 @@ class RecipeListItem extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 8),
+              // Roast level
+              if (recipe.roastLevel != null) ...[
+                Text(
+                  '焙煎度: ${_getRoastLevelName(recipe.roastLevel!)}',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: _getRoastColor(recipe.roastLevel!),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+              ],
               // Coffee weight and grinder setting
               Text(
                 '${recipe.coffeeWeight}g - ${recipe.grinderSetting}',
@@ -67,5 +79,17 @@ class RecipeListItem extends ConsumerWidget {
     final minute = date.minute.toString().padLeft(2, '0');
 
     return '$month/$day $hour:$minute';
+  }
+
+  String _getRoastLevelName(double level) {
+    if (level < 0.33) return 'ライトロースト';
+    if (level < 0.66) return 'ミディアムロースト';
+    return 'ダークロースト';
+  }
+
+  Color _getRoastColor(double level) {
+    if (level < 0.33) return Colors.brown[300]!;
+    if (level < 0.66) return Colors.brown[500]!;
+    return Colors.brown[800]!;
   }
 }
