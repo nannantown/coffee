@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -24,11 +23,7 @@ class _EditRecipeScreenState extends ConsumerState<EditRecipeScreen> {
   int _grinderSetting = 240;
   int _extractionTime = 30;
   double _roastLevel = 0.5;
-  int _rating = 3;
-  String _extractionSpeed = 'optimal';
-  
-  File? _selectedImage;
-  String? _existingPhotoUrl;
+
   bool _isLoading = false;
   bool _isInitialized = false;
 
@@ -39,10 +34,6 @@ class _EditRecipeScreenState extends ConsumerState<EditRecipeScreen> {
     _extractionTime = recipe.extractionTime ?? 30;
     _notesController.text = recipe.notes ?? '';
     _roastLevel = recipe.roastLevel ?? 0.5;
-    _rating = recipe.rating;
-    _extractionSpeed = recipe.extractionSpeed;
-    
-    _existingPhotoUrl = recipe.photoUrl;
     _isInitialized = true;
   }
 
@@ -63,22 +54,6 @@ class _EditRecipeScreenState extends ConsumerState<EditRecipeScreen> {
         throw Exception('User not authenticated');
       }
 
-      // 新しい写真がある場合はアップロード
-      String? photoUrl = _existingPhotoUrl;
-      if (_selectedImage != null) {
-        final storageService = ref.read(storageServiceProvider);
-        photoUrl = await storageService.uploadPhoto(_selectedImage!);
-
-        // 古い写真を削除
-        if (_existingPhotoUrl != null) {
-          try {
-            await storageService.deletePhoto(_existingPhotoUrl!);
-          } catch (e) {
-            print('Error deleting old photo: $e');
-          }
-        }
-      }
-
       // レシピを更新
       final notifier = ref.read(recipeNotifierProvider.notifier);
       final recipe = await notifier.updateRecipe(
@@ -88,11 +63,7 @@ class _EditRecipeScreenState extends ConsumerState<EditRecipeScreen> {
         grinderSetting: _grinderSetting.toString(),
         extractionTime: _extractionTime,
         roastLevel: _roastLevel,
-        rating: _rating,
-        extractionSpeed: _extractionSpeed,
-        
         notes: _notesController.text.isNotEmpty ? _notesController.text : null,
-        photoUrl: photoUrl,
       );
 
       if (recipe != null && mounted) {
@@ -140,18 +111,10 @@ class _EditRecipeScreenState extends ConsumerState<EditRecipeScreen> {
             extractionTime: _extractionTime,
             notesController: _notesController,
             roastLevel: _roastLevel,
-            rating: _rating,
-            extractionSpeed: _extractionSpeed,
-            
-            selectedImage: _selectedImage,
             onCoffeeWeightChanged: (value) => setState(() => _coffeeWeight = value),
             onGrinderSettingChanged: (value) => setState(() => _grinderSetting = value),
             onExtractionTimeChanged: (value) => setState(() => _extractionTime = value),
             onRoastLevelChanged: (value) => setState(() => _roastLevel = value),
-            onRatingChanged: (value) => setState(() => _rating = value),
-            onExtractionSpeedChanged: (value) => setState(() => _extractionSpeed = value),
-            
-            onImageSelected: (image) => setState(() => _selectedImage = image),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
