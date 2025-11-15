@@ -28,6 +28,7 @@ class RecipeService {
           .insert({
             'group_id': groupId,
             'created_by': userId,
+            'updated_by': userId, // 作成時は作成者が更新者
             'source_shot_id': sourceShotId,
             'coffee_weight': coffeeWeight,
             'grinder_setting': grinderSetting,
@@ -51,6 +52,7 @@ class RecipeService {
       final recipeWithUsername = {
         ...response,
         'created_by_username': username,
+        'updated_by_username': username, // 作成時は作成者が更新者
       };
 
       final recipe = EspressoRecipe.fromJson(recipeWithUsername);
@@ -81,12 +83,13 @@ class RecipeService {
   Future<EspressoRecipe> getRecipe(String recipeId) async {
     try {
       final response = await _supabase
-          .from('espresso_recipes')
-          .select()
-          .eq('id', recipeId)
-          .single();
+          .rpc('get_recipe_with_username', params: {'p_recipe_id': recipeId});
 
-      return EspressoRecipe.fromJson(response);
+      if (response == null || (response as List).isEmpty) {
+        throw Exception('Recipe not found');
+      }
+
+      return EspressoRecipe.fromJson(response[0]);
     } catch (e) {
       print('❌ Error fetching recipe: $e');
       rethrow;
@@ -114,6 +117,7 @@ class RecipeService {
       }
 
       final updateData = <String, dynamic>{
+        'updated_by': userId, // 更新者を記録
         'updated_at': DateTime.now().toIso8601String(),
       };
 
@@ -128,14 +132,13 @@ class RecipeService {
       if (notes != null) updateData['notes'] = notes;
       if (photoUrl != null) updateData['photo_url'] = photoUrl;
 
-      final response = await _supabase
+      await _supabase
           .from('espresso_recipes')
           .update(updateData)
-          .eq('id', recipeId)
-          .select()
-          .single();
+          .eq('id', recipeId);
 
-      final recipe = EspressoRecipe.fromJson(response);
+      // 更新後のデータをRPC関数で取得（ユーザー名付き）
+      final recipe = await getRecipe(recipeId);
       print('✅ Recipe updated: ${recipe.id}');
       return recipe;
     } catch (e) {
@@ -158,28 +161,6 @@ class RecipeService {
       print('✅ Recipe deleted: $recipeId');
     } catch (e) {
       print('❌ Error deleting recipe: $e');
-      rethrow;
-    }
-  }
-
-  // お気に入りトグル（グループメンバー誰でも変更可能）
-  Future<void> toggleFavorite(String recipeId) async {
-    try {
-      // 現在の状態を取得
-      final recipe = await getRecipe(recipeId);
-
-      // お気に入り状態を反転
-      await _supabase
-          .from('espresso_recipes')
-          .update({
-            'is_favorite': !recipe.isFavorite,
-            'updated_at': DateTime.now().toIso8601String(),
-          })
-          .eq('id', recipeId);
-
-      print('✅ Recipe favorite toggled: $recipeId -> ${!recipe.isFavorite}');
-    } catch (e) {
-      print('❌ Error toggling favorite: $e');
       rethrow;
     }
   }

@@ -79,12 +79,13 @@ class ShotService {
   Future<EspressoShot> getShot(String shotId) async {
     try {
       final response = await _supabase
-          .from('espresso_shots')
-          .select()
-          .eq('id', shotId)
-          .single();
+          .rpc('get_shot_with_username', params: {'p_shot_id': shotId});
 
-      return EspressoShot.fromJson(response);
+      if (response == null || (response as List).isEmpty) {
+        throw Exception('Shot not found');
+      }
+
+      return EspressoShot.fromJson(response[0]);
     } catch (e) {
       print('❌ Error fetching shot: $e');
       rethrow;
