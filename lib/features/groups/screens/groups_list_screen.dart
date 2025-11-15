@@ -21,16 +21,6 @@ class GroupsListScreen extends ConsumerWidget {
             onPressed: () => context.push('/profile'),
             tooltip: 'プロフィール',
           ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => context.push('/groups/create'),
-            tooltip: 'グループを作成',
-          ),
-          IconButton(
-            icon: const Icon(Icons.link),
-            onPressed: () => context.push('/groups/join'),
-            tooltip: 'グループに参加',
-          ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: (value) async {
@@ -86,78 +76,112 @@ class GroupsListScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: groupsAsync.when(
-        data: (groups) {
-          if (groups.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.groups_outlined,
-                    size: 64,
-                    color: Colors.grey,
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'グループがありません',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'グループを作成または参加してください',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 24),
-                  FilledButton.icon(
-                    onPressed: () => context.push('/groups/create'),
-                    icon: const Icon(Icons.add),
-                    label: const Text('グループを作成'),
-                  ),
-                ],
-              ),
-            );
-          }
+      body: Column(
+        children: [
+          Expanded(
+            child: groupsAsync.when(
+              data: (groups) {
+                if (groups.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.groups_outlined,
+                          size: 64,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'グループがありません',
+                          style: TextStyle(fontSize: 18, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'グループを作成または参加してください',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  );
+                }
 
-          return RefreshIndicator(
-            onRefresh: () => ref.refresh(userGroupsProvider.future),
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: groups.length,
-              itemBuilder: (context, index) {
-                final group = groups[index];
-                return Card(
-                  child: ListTile(
-                    leading: const CircleAvatar(
-                      child: Icon(Icons.coffee),
-                    ),
-                    title: Text(group.name),
-                    subtitle: Text(
-                      '作成日: ${_formatDate(group.createdAt)}',
-                    ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => context.push('/groups/${group.id}'),
+                return RefreshIndicator(
+                  onRefresh: () => ref.refresh(userGroupsProvider.future),
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: groups.length,
+                    itemBuilder: (context, index) {
+                      final group = groups[index];
+                      return Card(
+                        child: ListTile(
+                          leading: const CircleAvatar(
+                            child: Icon(Icons.coffee),
+                          ),
+                          title: Text(group.name),
+                          subtitle: Text(
+                            '作成日: ${_formatDate(group.createdAt)}',
+                          ),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => context.push('/groups/${group.id}'),
+                        ),
+                      );
+                    },
                   ),
                 );
               },
-            ),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
-              const SizedBox(height: 16),
-              Text('エラー: $error'),
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: () => ref.refresh(userGroupsProvider),
-                child: const Text('再試行'),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) => Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    const SizedBox(height: 16),
+                    Text('エラー: $error'),
+                    const SizedBox(height: 16),
+                    FilledButton(
+                      onPressed: () => ref.refresh(userGroupsProvider),
+                      child: const Text('再試行'),
+                    ),
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
+          _buildBottomActions(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomActions(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        border: Border(
+          top: BorderSide(
+            color: Theme.of(context).colorScheme.outlineVariant,
+            width: 1,
+          ),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            TextButton.icon(
+              onPressed: () => context.push('/groups/create'),
+              icon: const Icon(Icons.add),
+              label: const Text('グループを作成'),
+            ),
+            TextButton.icon(
+              onPressed: () => context.push('/groups/join'),
+              icon: const Icon(Icons.link),
+              label: const Text('グループに参加'),
+            ),
+          ],
         ),
       ),
     );
