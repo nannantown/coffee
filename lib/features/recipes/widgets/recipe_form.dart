@@ -346,29 +346,30 @@ class _RecipeFormState extends State<RecipeForm> {
           // Extraction Speed
           const Text('抽出速度', style: TextStyle(fontSize: 16)),
           const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+          Wrap(
+            spacing: 8,
             children: [
-              Radio<String>(
-                value: 'too_slow',
-                groupValue: widget.extractionSpeed,
-                onChanged: (value) => widget.onExtractionSpeedChanged(value!),
+              ChoiceChip(
+                label: const Text('遅すぎ'),
+                selected: widget.extractionSpeed == 'too_slow',
+                onSelected: (selected) {
+                  if (selected) widget.onExtractionSpeedChanged('too_slow');
+                },
               ),
-              const Text('遅すぎ'),
-              const SizedBox(width: 16),
-              Radio<String>(
-                value: 'optimal',
-                groupValue: widget.extractionSpeed,
-                onChanged: (value) => widget.onExtractionSpeedChanged(value!),
+              ChoiceChip(
+                label: const Text('最適'),
+                selected: widget.extractionSpeed == 'optimal',
+                onSelected: (selected) {
+                  if (selected) widget.onExtractionSpeedChanged('optimal');
+                },
               ),
-              const Text('最適'),
-              const SizedBox(width: 16),
-              Radio<String>(
-                value: 'too_fast',
-                groupValue: widget.extractionSpeed,
-                onChanged: (value) => widget.onExtractionSpeedChanged(value!),
+              ChoiceChip(
+                label: const Text('速すぎ'),
+                selected: widget.extractionSpeed == 'too_fast',
+                onSelected: (selected) {
+                  if (selected) widget.onExtractionSpeedChanged('too_fast');
+                },
               ),
-              const Text('速すぎ'),
             ],
           ),
           const SizedBox(height: 24),
