@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,10 +22,7 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
   int _grinderSetting = 240;
   int _extractionTime = 0;
   double _roastLevel = 0.5;
-  int _rating = 3;
-  String _extractionSpeed = 'optimal';
-  
-  File? _selectedImage;
+
   bool _isLoading = false;
 
   @override
@@ -46,13 +42,6 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
         throw Exception('User not authenticated');
       }
 
-      // 写真をアップロード（選択されている場合）
-      String? photoUrl;
-      if (_selectedImage != null) {
-        final storageService = ref.read(storageServiceProvider);
-        photoUrl = await storageService.uploadPhoto(_selectedImage!);
-      }
-
       // レシピを作成
       final notifier = ref.read(recipeNotifierProvider.notifier);
       final recipe = await notifier.createRecipe(
@@ -62,11 +51,9 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
         grinderSetting: _grinderSetting.toString(),
         extractionTime: _extractionTime,
         roastLevel: _roastLevel,
-        rating: _rating,
-        extractionSpeed: _extractionSpeed,
-        
+        rating: 3, // デフォルト値
+        extractionSpeed: 'optimal', // デフォルト値
         notes: _notesController.text.isNotEmpty ? _notesController.text : null,
-        photoUrl: photoUrl,
       );
 
       if (recipe != null && mounted) {
@@ -103,18 +90,10 @@ class _CreateRecipeScreenState extends ConsumerState<CreateRecipeScreen> {
         extractionTime: _extractionTime,
         notesController: _notesController,
         roastLevel: _roastLevel,
-        rating: _rating,
-        extractionSpeed: _extractionSpeed,
-        
-        selectedImage: _selectedImage,
         onCoffeeWeightChanged: (value) => setState(() => _coffeeWeight = value),
         onGrinderSettingChanged: (value) => setState(() => _grinderSetting = value),
         onExtractionTimeChanged: (value) => setState(() => _extractionTime = value),
         onRoastLevelChanged: (value) => setState(() => _roastLevel = value),
-        onRatingChanged: (value) => setState(() => _rating = value),
-        onExtractionSpeedChanged: (value) => setState(() => _extractionSpeed = value),
-        
-        onImageSelected: (image) => setState(() => _selectedImage = image),
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
