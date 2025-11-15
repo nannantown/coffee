@@ -20,8 +20,8 @@ class PrimaryActionButton extends StatelessWidget {
     return FilledButton(
       onPressed: isLoading ? null : onPressed,
       style: FilledButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
       ),
       child: isLoading
           ? const SizedBox(
