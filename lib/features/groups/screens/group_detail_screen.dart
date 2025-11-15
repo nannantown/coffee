@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,12 +7,15 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import '../providers/group_provider.dart';
 import '../models/group_member.dart';
+import '../models/coffee_group.dart';
 import '../../recipes/providers/recipe_provider.dart';
 import '../../recipes/providers/shot_provider.dart';
 import '../../recipes/models/espresso_recipe.dart';
 import '../../recipes/models/espresso_shot.dart';
 import '../../recipes/widgets/recipe_list_item.dart';
 import '../../recipes/widgets/shot_list_item.dart';
+import '../../../core/services/storage_service.dart';
+import '../../../core/utils/image_picker_util.dart';
 
 class GroupDetailScreen extends ConsumerStatefulWidget {
   final String groupId;
@@ -65,12 +69,12 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen>
 
               return [
                 const PopupMenuItem(
-                  value: 'edit_name',
+                  value: 'edit',
                   child: Row(
                     children: [
                       Icon(Icons.edit, size: 20),
                       SizedBox(width: 8),
-                      Text('グループ名を編集'),
+                      Text('グループを編集'),
                     ],
                   ),
                 ),
@@ -98,9 +102,9 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen>
               ];
             },
             onSelected: (value) {
-              if (value == 'edit_name') {
+              if (value == 'edit') {
                 groupAsync.whenData((group) {
-                  _showEditGroupNameDialog(context, ref, group.name);
+                  _showEditGroupDialog(context, ref, group);
                 });
               } else if (value == 'leave') {
                 _confirmLeaveGroup(context, ref);
@@ -599,67 +603,178 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen>
     }
   }
 
-  Future<void> _showEditGroupNameDialog(
+  Future<void> _showEditGroupDialog(
     BuildContext context,
     WidgetRef ref,
-    String currentName,
+    CoffeeGroup group,
   ) async {
-    final controller = TextEditingController(text: currentName);
+    final nameController = TextEditingController(text: group.name);
     final formKey = GlobalKey<FormState>();
+    File? selectedImage;
+    bool imageChanged = false;
 
-    final newName = await showDialog<String>(
+    final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('グループ名を編集'),
-        content: Form(
-          key: formKey,
-          child: TextFormField(
-            controller: controller,
-            decoration: const InputDecoration(
-              labelText: 'グループ名',
-              border: OutlineInputBorder(),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('グループを編集'),
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Group Image Section
+                  GestureDetector(
+                    onTap: () async {
+                      final source = await showDialog<String>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('グループ画像を選択'),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListTile(
+                                leading: const Icon(Icons.photo_library),
+                                title: const Text('ギャラリーから選択'),
+                                onTap: () => Navigator.pop(context, 'gallery'),
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.camera_alt),
+                                title: const Text('カメラで撮影'),
+                                onTap: () => Navigator.pop(context, 'camera'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+
+                      if (source != null) {
+                        final File? imageFile = source == 'gallery'
+                            ? await ImagePickerUtil.pickImageFromGallery()
+                            : await ImagePickerUtil.pickImageFromCamera();
+
+                        if (imageFile != null) {
+                          setState(() {
+                            selectedImage = imageFile;
+                            imageChanged = true;
+                          });
+                        }
+                      }
+                    },
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(12),
+                        image: selectedImage != null
+                            ? DecorationImage(
+                                image: FileImage(selectedImage!),
+                                fit: BoxFit.cover,
+                              )
+                            : (group.imageUrl != null
+                                ? DecorationImage(
+                                    image: NetworkImage(group.imageUrl!),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null),
+                      ),
+                      child: selectedImage == null && group.imageUrl == null
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.add_photo_alternate,
+                                  size: 40,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'グループ画像',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : null,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  // Group Name Field
+                  TextFormField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'グループ名',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'グループ名を入力してください';
+                      }
+                      if (value.trim().length < 2) {
+                        return 'グループ名は2文字以上で入力してください';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
             ),
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'グループ名を入力してください';
-              }
-              if (value.trim().length < 2) {
-                return 'グループ名は2文字以上で入力してください';
-              }
-              return null;
-            },
-            autofocus: true,
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('キャンセル'),
+            ),
+            FilledButton(
+              onPressed: () {
+                if (formKey.currentState!.validate()) {
+                  Navigator.pop(context, {
+                    'name': nameController.text.trim(),
+                    'image': selectedImage,
+                    'imageChanged': imageChanged,
+                  });
+                }
+              },
+              child: const Text('保存'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('キャンセル'),
-          ),
-          FilledButton(
-            onPressed: () {
-              if (formKey.currentState!.validate()) {
-                Navigator.pop(context, controller.text.trim());
-              }
-            },
-            child: const Text('保存'),
-          ),
-        ],
       ),
     );
 
-    if (newName != null && newName != currentName && context.mounted) {
+    if (result != null && context.mounted) {
       final userId = Supabase.instance.client.auth.currentUser?.id;
       if (userId == null) return;
 
       try {
-        final notifier = ref.read(groupNotifierProvider.notifier);
-        await notifier.updateGroupName(widget.groupId, userId, newName);
+        final newName = result['name'] as String;
+        final newImage = result['image'] as File?;
+        final imageChanged = result['imageChanged'] as bool;
+
+        // Update image if changed
+        if (imageChanged && newImage != null) {
+          final storageService = StorageService(Supabase.instance.client);
+          final imageUrl = await storageService.uploadGroupImage(newImage);
+
+          final groupService = ref.read(groupServiceProvider);
+          await groupService.updateGroupImage(widget.groupId, userId, imageUrl);
+        }
+
+        // Update name if changed
+        if (newName != group.name) {
+          final notifier = ref.read(groupNotifierProvider.notifier);
+          await notifier.updateGroupName(widget.groupId, userId, newName);
+        }
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('グループ名を更新しました')),
+            const SnackBar(content: Text('グループを更新しました')),
           );
+          ref.invalidate(groupDetailProvider(widget.groupId));
         }
       } catch (e) {
         if (context.mounted) {
