@@ -217,9 +217,9 @@ class RecipeDetailScreen extends ConsumerWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
-              color: Colors.black87,
+              color: Colors.grey[800],
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -241,11 +241,11 @@ class RecipeDetailScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 '焙煎度',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.black87,
+                  color: Colors.grey[800],
                   fontWeight: FontWeight.w500,
                 ),
               ),
