@@ -55,11 +55,11 @@ class GroupNotifier extends Notifier<AsyncValue<void>> {
   @override
   AsyncValue<void> build() => const AsyncValue.data(null);
 
-  Future<CoffeeGroup?> createGroup(String name, String userId) async {
+  Future<CoffeeGroup?> createGroup(String name, String userId, {String? imageUrl}) async {
     state = const AsyncValue.loading();
     try {
       final groupService = ref.read(groupServiceProvider);
-      final group = await groupService.createGroup(name, userId);
+      final group = await groupService.createGroup(name, userId, imageUrl: imageUrl);
       state = const AsyncValue.data(null);
       return group;
     } catch (e, stack) {

@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../providers/profile_provider.dart';
 import '../providers/auth_provider.dart';
+import '../../../core/services/storage_service.dart';
+import '../../../core/utils/image_picker_util.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -17,6 +20,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final _usernameController = TextEditingController();
   bool _isLoading = false;
   bool _isEditing = false;
+  bool _isUploadingAvatar = false;
 
   @override
   void dispose() {
@@ -55,6 +59,74 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
+  Future<void> _pickAndUploadAvatar() async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) return;
+
+    // Show image source selection
+    final source = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('プロフィール画像を選択'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('ギャラリーから選択'),
+              onTap: () => Navigator.pop(context, 'gallery'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('カメラで撮影'),
+              onTap: () => Navigator.pop(context, 'camera'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null || !mounted) return;
+
+    // Pick image
+    final File? imageFile = source == 'gallery'
+        ? await ImagePickerUtil.pickImageFromGallery()
+        : await ImagePickerUtil.pickImageFromCamera();
+
+    if (imageFile == null || !mounted) return;
+
+    setState(() => _isUploadingAvatar = true);
+
+    try {
+      // Upload to storage
+      final storageService = StorageService(Supabase.instance.client);
+      final avatarUrl = await storageService.uploadAvatar(imageFile);
+
+      // Update profile
+      final profileService = ref.read(profileServiceProvider);
+      await profileService.updateAvatar(userId, avatarUrl);
+
+      // Refresh profile data
+      ref.invalidate(currentUserProfileProvider);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('プロフィール画像を更新しました')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('エラー: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isUploadingAvatar = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(currentUserProfileProvider);
@@ -89,19 +161,56 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               children: [
                 const SizedBox(height: 32),
                 // Profile Avatar
-                CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                  child: Text(
-                    (profile['username'] as String?)?.isNotEmpty == true
-                        ? (profile['username'] as String)[0].toUpperCase()
-                        : '?',
-                    style: TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                      backgroundImage: profile['avatar_url'] != null
+                          ? NetworkImage(profile['avatar_url'] as String)
+                          : null,
+                      child: profile['avatar_url'] == null
+                          ? Text(
+                              (profile['username'] as String?)?.isNotEmpty == true
+                                  ? (profile['username'] as String)[0].toUpperCase()
+                                  : '?',
+                              style: TextStyle(
+                                fontSize: 40,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                              ),
+                            )
+                          : null,
                     ),
-                  ),
+                    if (_isUploadingAvatar)
+                      Positioned.fill(
+                        child: CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Colors.black54,
+                          child: const CircularProgressIndicator(color: Colors.white),
+                        ),
+                      ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Material(
+                        color: Theme.of(context).colorScheme.primary,
+                        shape: const CircleBorder(),
+                        child: InkWell(
+                          onTap: _isUploadingAvatar ? null : _pickAndUploadAvatar,
+                          customBorder: const CircleBorder(),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Icon(
+                              Icons.camera_alt,
+                              size: 20,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 // Email

@@ -113,8 +113,17 @@ class GroupsListScreen extends ConsumerWidget {
                       final group = groups[index];
                       return Card(
                         child: ListTile(
-                          leading: const CircleAvatar(
-                            child: Icon(Icons.coffee),
+                          leading: CircleAvatar(
+                            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                            backgroundImage: group.imageUrl != null
+                                ? NetworkImage(group.imageUrl!)
+                                : null,
+                            child: group.imageUrl == null
+                                ? Icon(
+                                    Icons.coffee,
+                                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                  )
+                                : null,
                           ),
                           title: Text(group.name),
                           subtitle: Text(

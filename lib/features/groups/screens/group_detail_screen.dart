@@ -118,6 +118,29 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen>
         },
         child: Column(
           children: [
+            // Group Image Header
+            groupAsync.when(
+              data: (group) => group.imageUrl != null
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: Center(
+                        child: Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            image: DecorationImage(
+                              image: NetworkImage(group.imageUrl!),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+              loading: () => const SizedBox.shrink(),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
             // メンバー数表示（固定）
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
