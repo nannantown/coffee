@@ -100,12 +100,12 @@ class ShotDetailScreen extends ConsumerWidget {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
-                _buildInfoRow('コーヒー豆', '${shot.coffeeWeight}g'),
-                _buildInfoRow('グラインダー', shot.grinderSetting),
+                _buildInfoRow('コーヒー豆', '${shot.coffeeWeight}g', context),
+                _buildInfoRow('グラインダー', shot.grinderSetting, context),
                 if (shot.extractionTime != null)
-                  _buildInfoRow('抽出時間', '${shot.extractionTime}秒'),
+                  _buildInfoRow('抽出時間', '${shot.extractionTime}秒', context),
                 if (shot.roastLevel != null)
-                  _buildRoastLevel(shot.roastLevel!),
+                  _buildRoastLevel(shot.roastLevel!, context),
               ],
             ),
           ),
@@ -182,7 +182,7 @@ class ShotDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(String label, String value, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -192,7 +192,7 @@ class ShotDetailScreen extends ConsumerWidget {
             label,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey[800],
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -205,7 +205,7 @@ class ShotDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildRoastLevel(double level) {
+  Widget _buildRoastLevel(double level, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Column(
@@ -218,7 +218,7 @@ class ShotDetailScreen extends ConsumerWidget {
                 '焙煎度',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey[800],
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w500,
                 ),
               ),
