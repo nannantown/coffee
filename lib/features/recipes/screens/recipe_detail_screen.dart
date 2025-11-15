@@ -166,10 +166,14 @@ class RecipeDetailScreen extends ConsumerWidget {
                       label: Text(
                         recipe.extractionSpeed == 'too_slow' ? '遅すぎ' :
                         recipe.extractionSpeed == 'too_fast' ? '速すぎ' : '最適',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
                       ),
                       backgroundColor: recipe.extractionSpeed == 'optimal'
-                          ? Colors.green[100]
-                          : Colors.orange[100],
+                          ? Colors.green[700]
+                          : Colors.orange[700],
                     ),
                   ],
                 ),
@@ -213,7 +217,11 @@ class RecipeDetailScreen extends ConsumerWidget {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.black87,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           Text(
             value,
@@ -233,9 +241,13 @@ class RecipeDetailScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              const Text(
                 '焙煎度',
-                style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               Text(
                 _getRoastLevelName(level),
