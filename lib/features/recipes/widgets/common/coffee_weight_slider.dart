@@ -21,8 +21,9 @@ class CoffeeWeightSlider extends StatelessWidget {
         ),
         Slider(
           value: value,
-          min: 10.0,
-          max: 30.0,
+          min: 12.0,
+          max: 24.0,
+          divisions: 24, // 0.5g increments: (24 - 12) / 0.5 = 24
           label: '${value.toStringAsFixed(1)}g',
           onChanged: onChanged,
         ),

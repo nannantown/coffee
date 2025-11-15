@@ -21,8 +21,9 @@ class GrinderSettingSlider extends StatelessWidget {
         ),
         Slider(
           value: value.toDouble(),
-          min: 140.0,
-          max: 350.0,
+          min: 180.0,
+          max: 320.0,
+          divisions: 14, // 10 unit increments: (320 - 180) / 10 = 14
           label: '$value',
           onChanged: (val) => onChanged(val.round()),
         ),

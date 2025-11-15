@@ -117,6 +117,10 @@ class _CreateShotScreenState extends ConsumerState<CreateShotScreen> {
           padding: const EdgeInsets.all(16),
           child: FilledButton(
             onPressed: _isLoading ? null : _createShot,
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
             child: _isLoading
                 ? const SizedBox(
                     height: 20,
