@@ -23,12 +23,19 @@ class RoastLevelSlider extends StatelessWidget {
               '焙煎レベル: ${(value * 100).toInt()}%',
               style: const TextStyle(fontSize: 16),
             ),
-            Text(
-              _getRoastLevelName(value),
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
                 color: _getRoastColor(value),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                _getRoastLevelName(value),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: _getRoastTextColor(value),
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ],
@@ -76,5 +83,14 @@ class RoastLevelSlider extends StatelessWidget {
     if (level < 0.6) return Colors.brown[500]!;
     if (level < 0.8) return Colors.brown[700]!;
     return Colors.brown[900]!;
+  }
+
+  Color _getRoastTextColor(double level) {
+    // Light and Cinnamon roast - use dark text
+    if (level < 0.4) return Colors.brown[900]!;
+    // Medium roast - use white text for better contrast
+    if (level < 0.6) return Colors.white;
+    // High and Dark roast - use white text
+    return Colors.white;
   }
 }
