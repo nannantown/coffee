@@ -204,9 +204,11 @@ class _RecipeFormState extends State<RecipeForm> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('ライト', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-              Text('ミディアム', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-              Text('ダーク', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+              Text('ライト', style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+              Text('シナモン', style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+              Text('ミディアム', style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+              Text('ハイ', style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+              Text('ダーク', style: TextStyle(fontSize: 11, color: Colors.grey[600])),
             ],
           ),
           const SizedBox(height: 24),
@@ -231,14 +233,18 @@ class _RecipeFormState extends State<RecipeForm> {
   }
 
   String _getRoastLevelName(double level) {
-    if (level < 0.33) return 'ライトロースト';
-    if (level < 0.66) return 'ミディアムロースト';
+    if (level < 0.2) return 'ライトロースト';
+    if (level < 0.4) return 'シナモンロースト';
+    if (level < 0.6) return 'ミディアムロースト';
+    if (level < 0.8) return 'ハイロースト';
     return 'ダークロースト';
   }
 
   Color _getRoastColor(double level) {
-    if (level < 0.33) return Colors.brown[300]!;
-    if (level < 0.66) return Colors.brown[500]!;
-    return Colors.brown[800]!;
+    if (level < 0.2) return Colors.brown[200]!;
+    if (level < 0.4) return Colors.brown[300]!;
+    if (level < 0.6) return Colors.brown[500]!;
+    if (level < 0.8) return Colors.brown[700]!;
+    return Colors.brown[900]!;
   }
 }

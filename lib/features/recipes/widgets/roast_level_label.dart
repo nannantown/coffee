@@ -32,23 +32,27 @@ class RoastLevelLabel extends StatelessWidget {
   }
 
   String _getRoastLevelName(double level) {
-    if (level < 0.33) return 'ライトロースト';
-    if (level < 0.66) return 'ミディアムロースト';
+    if (level < 0.2) return 'ライトロースト';
+    if (level < 0.4) return 'シナモンロースト';
+    if (level < 0.6) return 'ミディアムロースト';
+    if (level < 0.8) return 'ハイロースト';
     return 'ダークロースト';
   }
 
   Color _getRoastColor(double level) {
-    if (level < 0.33) return Colors.brown[300]!;
-    if (level < 0.66) return Colors.brown[500]!;
-    return Colors.brown[800]!;
+    if (level < 0.2) return Colors.brown[200]!;
+    if (level < 0.4) return Colors.brown[300]!;
+    if (level < 0.6) return Colors.brown[500]!;
+    if (level < 0.8) return Colors.brown[700]!;
+    return Colors.brown[900]!;
   }
 
   Color _getRoastTextColor(double level) {
-    // Light roast (brown[300]) - use dark text
-    if (level < 0.33) return Colors.brown[900]!;
-    // Medium roast (brown[500]) - use white text
-    if (level < 0.66) return Colors.white;
-    // Dark roast (brown[800]) - use white text
+    // Light and Cinnamon roast - use dark text
+    if (level < 0.4) return Colors.brown[900]!;
+    // Medium roast - use white text for better contrast
+    if (level < 0.6) return Colors.white;
+    // High and Dark roast - use white text
     return Colors.white;
   }
 }

@@ -144,21 +144,41 @@ class RecipeDetailScreen extends ConsumerWidget {
   Widget _buildRoastLevel(double level, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '焙煎度',
-            style: TextStyle(
-              fontSize: 16,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '焙煎度',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              RoastLevelLabel(roastLevel: level, showLabel: false),
+            ],
           ),
-          RoastLevelLabel(roastLevel: level, showLabel: false),
+          const SizedBox(height: 8),
+          LinearProgressIndicator(
+            value: level,
+            backgroundColor: Colors.grey[300],
+            valueColor: AlwaysStoppedAnimation(_getRoastColor(level)),
+            minHeight: 8,
+          ),
         ],
       ),
     );
+  }
+
+  Color _getRoastColor(double level) {
+    if (level < 0.2) return Colors.brown[200]!;
+    if (level < 0.4) return Colors.brown[300]!;
+    if (level < 0.6) return Colors.brown[500]!;
+    if (level < 0.8) return Colors.brown[700]!;
+    return Colors.brown[900]!;
   }
 
   String _formatDate(DateTime date) {
