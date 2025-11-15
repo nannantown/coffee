@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/espresso_shot.dart';
 import '../providers/shot_provider.dart';
 import '../widgets/roast_level_label.dart';
+import '../widgets/creator_info_row.dart';
 
 class ShotDetailScreen extends ConsumerWidget {
   final String shotId;
@@ -68,24 +69,13 @@ class ShotDetailScreen extends ConsumerWidget {
         ],
 
         // Creator info
-        Row(
-          children: [
-            Icon(Icons.person, size: 20, color: Colors.grey[600]),
-            const SizedBox(width: 8),
-            Text(
-              shot.createdByUsername,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[700],
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const Spacer(),
-            Text(
-              _formatDate(shot.createdAt),
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-            ),
-          ],
+        CreatorInfoRow(
+          avatarUrl: shot.createdByAvatarUrl,
+          username: shot.createdByUsername,
+          date: shot.createdAt,
+          avatarRadius: 20,
+          fontSize: 16,
+          showDate: true,
         ),
         const SizedBox(height: 24),
 
@@ -259,13 +249,4 @@ class ShotDetailScreen extends ConsumerWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
-    final year = date.year;
-    final month = date.month.toString().padLeft(2, '0');
-    final day = date.day.toString().padLeft(2, '0');
-    final hour = date.hour.toString().padLeft(2, '0');
-    final minute = date.minute.toString().padLeft(2, '0');
-
-    return '$year/$month/$day $hour:$minute';
-  }
 }

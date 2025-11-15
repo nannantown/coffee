@@ -127,6 +127,22 @@ class GroupNotifier extends Notifier<AsyncValue<void>> {
       rethrow;
     }
   }
+
+  Future<void> updateGroupOrder(String userId, List<String> groupIds) async {
+    state = const AsyncValue.loading();
+    try {
+      final groupService = ref.read(groupServiceProvider);
+      await groupService.updateGroupOrder(userId, groupIds);
+
+      // グループリストをリフレッシュ
+      ref.invalidate(userGroupsProvider);
+
+      state = const AsyncValue.data(null);
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      rethrow;
+    }
+  }
 }
 
 final groupNotifierProvider =

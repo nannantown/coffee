@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../models/espresso_shot.dart';
+import 'creator_info_row.dart';
 
 class ShotListItem extends ConsumerWidget {
   final EspressoShot shot;
@@ -21,47 +22,47 @@ class ShotListItem extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 60×60 Thumbnail
-              if (shot.photoUrl != null) ...[
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    shot.photoUrl!,
-                    width: 60,
-                    height: 60,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: shot.photoUrl != null
+                    ? Image.network(
+                        shot.photoUrl!,
                         width: 60,
                         height: 60,
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.error, size: 24),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-              ],
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: 60,
+                            height: 60,
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.error, size: 24),
+                          );
+                        },
+                      )
+                    : Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          Icons.local_cafe,
+                          size: 32,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+              ),
+              const SizedBox(width: 12),
               // Shot Info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // User info
-                    Row(
-                      children: [
-                        Icon(Icons.person, size: 14, color: Colors.grey[600]),
-                        const SizedBox(width: 4),
-                        Flexible(
-                          child: Text(
-                            shot.createdByUsername,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                    // Creator info
+                    CreatorInfoRow(
+                      avatarUrl: shot.createdByAvatarUrl,
+                      username: shot.createdByUsername,
                     ),
                     const SizedBox(height: 8),
                     // Coffee weight and grinder setting

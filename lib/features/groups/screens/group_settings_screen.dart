@@ -10,6 +10,7 @@ import '../../../core/services/storage_service.dart';
 import '../../../core/utils/image_picker_util.dart';
 import '../../../core/widgets/image_picker_avatar.dart';
 import '../../../core/widgets/editable_field_card.dart';
+import '../../../core/widgets/primary_action_button.dart';
 
 class GroupSettingsScreen extends ConsumerStatefulWidget {
   final String groupId;
@@ -428,10 +429,10 @@ class _GroupSettingsScreenState extends ConsumerState<GroupSettingsScreen> {
                   padding: const EdgeInsets.all(16),
                   child: SizedBox(
                     width: double.infinity,
-                    child: OutlinedButton.icon(
+                    child: PrimaryActionButton.outlined(
                       onPressed: () => _confirmLeaveGroup(group),
-                      icon: const Icon(Icons.exit_to_app),
-                      label: const Text('グループを退会'),
+                      icon: Icons.exit_to_app,
+                      label: 'グループを退会',
                     ),
                   ),
                 ),
@@ -441,16 +442,11 @@ class _GroupSettingsScreenState extends ConsumerState<GroupSettingsScreen> {
                     padding: const EdgeInsets.all(16),
                     child: SizedBox(
                       width: double.infinity,
-                      child: OutlinedButton.icon(
+                      child: PrimaryActionButton.outlined(
                         onPressed: _confirmDelete,
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        label: const Text(
-                          'グループを削除',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.red),
-                        ),
+                        icon: Icons.delete,
+                        label: 'グループを削除',
+                        color: Colors.red,
                       ),
                     ),
                   ),

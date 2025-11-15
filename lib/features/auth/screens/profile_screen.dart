@@ -9,6 +9,7 @@ import '../../../core/services/storage_service.dart';
 import '../../../core/utils/image_picker_util.dart';
 import '../../../core/widgets/image_picker_avatar.dart';
 import '../../../core/widgets/editable_field_card.dart';
+import '../../../core/widgets/primary_action_button.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -211,7 +212,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   padding: const EdgeInsets.all(16),
                   child: SizedBox(
                     width: double.infinity,
-                    child: OutlinedButton.icon(
+                    child: PrimaryActionButton.outlined(
                       onPressed: () async {
                         final shouldLogout = await showDialog<bool>(
                           context: context,
@@ -249,8 +250,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           }
                         }
                       },
-                      icon: const Icon(Icons.logout),
-                      label: const Text('ログアウト'),
+                      icon: Icons.logout,
+                      label: 'ログアウト',
                     ),
                   ),
                 ),

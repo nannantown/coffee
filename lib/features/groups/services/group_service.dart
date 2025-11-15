@@ -48,8 +48,9 @@ class GroupService {
     try {
       final response = await _supabase
           .from('group_members')
-          .select('group_id, coffee_groups(*)')
-          .eq('user_id', userId);
+          .select('group_id, display_order, coffee_groups(*)')
+          .eq('user_id', userId)
+          .order('display_order');
 
       final groups = (response as List)
           .map((item) => CoffeeGroup.fromJson(item['coffee_groups']))
@@ -242,6 +243,25 @@ class GroupService {
       print('✅ Group image updated');
     } catch (e) {
       print('❌ Error updating group image: $e');
+      rethrow;
+    }
+  }
+
+  // グループの並び替え順序を更新
+  Future<void> updateGroupOrder(String userId, List<String> groupIds) async {
+    try {
+      // 各グループのdisplay_orderを更新
+      for (int i = 0; i < groupIds.length; i++) {
+        await _supabase
+            .from('group_members')
+            .update({'display_order': i})
+            .eq('user_id', userId)
+            .eq('group_id', groupIds[i]);
+      }
+
+      print('✅ Group order updated');
+    } catch (e) {
+      print('❌ Error updating group order: $e');
       rethrow;
     }
   }

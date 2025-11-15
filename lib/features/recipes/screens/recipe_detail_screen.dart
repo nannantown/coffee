@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/espresso_recipe.dart';
 import '../providers/recipe_provider.dart';
 import '../widgets/roast_level_label.dart';
+import '../widgets/creator_info_row.dart';
 
 class RecipeDetailScreen extends ConsumerWidget {
   final String recipeId;
@@ -46,25 +47,14 @@ class RecipeDetailScreen extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // Creator info and favorite badge
-        Row(
-          children: [
-            Icon(Icons.person, size: 20, color: Colors.grey[600]),
-            const SizedBox(width: 8),
-            Text(
-              recipe.updatedByUsername,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[700],
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const Spacer(),
-            Text(
-              _formatDate(recipe.updatedAt),
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-            ),
-          ],
+        // Creator info
+        CreatorInfoRow(
+          avatarUrl: recipe.createdByAvatarUrl,
+          username: recipe.createdByUsername,
+          date: recipe.createdAt,
+          avatarRadius: 20,
+          fontSize: 16,
+          showDate: true,
         ),
         const SizedBox(height: 24),
 
@@ -181,13 +171,4 @@ class RecipeDetailScreen extends ConsumerWidget {
     return Colors.brown[900]!;
   }
 
-  String _formatDate(DateTime date) {
-    final year = date.year;
-    final month = date.month.toString().padLeft(2, '0');
-    final day = date.day.toString().padLeft(2, '0');
-    final hour = date.hour.toString().padLeft(2, '0');
-    final minute = date.minute.toString().padLeft(2, '0');
-
-    return '$year/$month/$day $hour:$minute';
-  }
 }

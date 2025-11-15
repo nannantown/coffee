@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/group_provider.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../auth/providers/profile_provider.dart';
 
 class GroupsListScreen extends ConsumerWidget {
   const GroupsListScreen({super.key});
@@ -11,13 +12,41 @@ class GroupsListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final groupsAsync = ref.watch(userGroupsProvider);
     final authService = ref.watch(authServiceProvider);
+    final groupNotifier = ref.read(groupNotifierProvider.notifier);
+    final currentUserId = authService.currentUser?.id;
+    final profileAsync = ref.watch(currentUserProfileProvider);
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.person),
-          onPressed: () => context.push('/profile'),
-          tooltip: 'プロフィール',
+        leading: profileAsync.when(
+          data: (profile) => IconButton(
+            icon: CircleAvatar(
+              radius: 16,
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              backgroundImage: profile['avatar_url'] != null
+                  ? NetworkImage(profile['avatar_url'] as String)
+                  : null,
+              child: profile['avatar_url'] == null
+                  ? Icon(
+                      Icons.person,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    )
+                  : null,
+            ),
+            onPressed: () => context.push('/profile'),
+            tooltip: 'プロフィール',
+          ),
+          loading: () => IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () => context.push('/profile'),
+            tooltip: 'プロフィール',
+          ),
+          error: (_, __) => IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () => context.push('/profile'),
+            tooltip: 'プロフィール',
+          ),
         ),
         title: const Text('マイグループ'),
         centerTitle: true,
@@ -106,12 +135,27 @@ class GroupsListScreen extends ConsumerWidget {
 
                 return RefreshIndicator(
                   onRefresh: () => ref.refresh(userGroupsProvider.future),
-                  child: ListView.builder(
+                  child: ReorderableListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: groups.length,
+                    onReorder: (oldIndex, newIndex) async {
+                      if (currentUserId == null) return;
+
+                      // リストのローカル順序を更新
+                      if (oldIndex < newIndex) {
+                        newIndex -= 1;
+                      }
+                      final item = groups.removeAt(oldIndex);
+                      groups.insert(newIndex, item);
+
+                      // データベースに保存
+                      final groupIds = groups.map((g) => g.id).toList();
+                      await groupNotifier.updateGroupOrder(currentUserId, groupIds);
+                    },
                     itemBuilder: (context, index) {
                       final group = groups[index];
                       return Card(
+                        key: ValueKey(group.id),
                         child: ListTile(
                           leading: CircleAvatar(
                             backgroundColor: Theme.of(context).colorScheme.primaryContainer,

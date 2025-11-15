@@ -3,6 +3,7 @@ class EspressoRecipe {
   final String groupId;
   final String createdBy;
   final String createdByUsername;
+  final String? createdByAvatarUrl;
   final String updatedBy;
   final String updatedByUsername;
   final String? sourceShotId;
@@ -22,6 +23,7 @@ class EspressoRecipe {
     required this.groupId,
     required this.createdBy,
     required this.createdByUsername,
+    this.createdByAvatarUrl,
     required this.updatedBy,
     required this.updatedByUsername,
     this.sourceShotId,
@@ -43,6 +45,7 @@ class EspressoRecipe {
       groupId: json['group_id'] as String,
       createdBy: json['created_by'] as String,
       createdByUsername: json['created_by_username'] as String? ?? 'Unknown',
+      createdByAvatarUrl: json['created_by_avatar_url'] as String?,
       updatedBy: json['updated_by'] as String,
       updatedByUsername: json['updated_by_username'] as String? ?? 'Unknown',
       sourceShotId: json['source_shot_id'] as String?,
@@ -86,6 +89,7 @@ class EspressoRecipe {
     String? groupId,
     String? createdBy,
     String? createdByUsername,
+    String? createdByAvatarUrl,
     String? updatedBy,
     String? updatedByUsername,
     String? sourceShotId,
@@ -105,6 +109,7 @@ class EspressoRecipe {
       groupId: groupId ?? this.groupId,
       createdBy: createdBy ?? this.createdBy,
       createdByUsername: createdByUsername ?? this.createdByUsername,
+      createdByAvatarUrl: createdByAvatarUrl ?? this.createdByAvatarUrl,
       updatedBy: updatedBy ?? this.updatedBy,
       updatedByUsername: updatedByUsername ?? this.updatedByUsername,
       sourceShotId: sourceShotId ?? this.sourceShotId,

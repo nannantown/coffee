@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import '../providers/group_provider.dart';
-import '../models/group_member.dart';
 import '../../recipes/providers/recipe_provider.dart';
 import '../../recipes/providers/shot_provider.dart';
 import '../../recipes/models/espresso_recipe.dart';
 import '../../recipes/models/espresso_shot.dart';
 import '../../recipes/widgets/recipe_list_item.dart';
 import '../../recipes/widgets/shot_list_item.dart';
+import '../../../core/widgets/invite_code_display.dart';
 
 class GroupDetailScreen extends ConsumerStatefulWidget {
   final String groupId;
@@ -72,50 +71,44 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen>
         },
         child: Column(
           children: [
-            // Group Image Header
-            groupAsync.when(
-              data: (group) => group.imageUrl != null
-                  ? Padding(
-                      padding: const EdgeInsets.only(top: 16),
-                      child: Center(
-                        child: Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            image: DecorationImage(
-                              image: NetworkImage(group.imageUrl!),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-              loading: () => const SizedBox.shrink(),
-              error: (_, __) => const SizedBox.shrink(),
-            ),
             // メンバー数表示（固定）
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: membersAsync.when(
-                data: (members) => Card(
-                  child: InkWell(
-                    onTap: () => _showMembersDialog(context, members),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.people),
-                          const SizedBox(width: 8),
-                          Text('${members.length}人のメンバー'),
-                          const Spacer(),
-                          const Icon(Icons.chevron_right, size: 20),
-                        ],
+              child: groupAsync.when(
+                data: (group) => membersAsync.when(
+                  data: (members) => Card(
+                    child: InkWell(
+                      onTap: () => _showMembersDialog(context, members),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 12,
+                              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                              backgroundImage: group.imageUrl != null
+                                  ? NetworkImage(group.imageUrl!)
+                                  : null,
+                              child: group.imageUrl == null
+                                  ? Icon(
+                                      Icons.coffee,
+                                      size: 14,
+                                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                    )
+                                  : null,
+                            ),
+                            const SizedBox(width: 12),
+                            Text('${members.length}人のメンバー'),
+                            const Spacer(),
+                            const Icon(Icons.chevron_right, size: 20),
+                          ],
+                        ),
                       ),
                     ),
                   ),
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
                 ),
                 loading: () => const SizedBox.shrink(),
                 error: (_, __) => const SizedBox.shrink(),
@@ -260,33 +253,76 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen>
     );
   }
 
-  void _showMembersDialog(BuildContext context, List<dynamic> members) {
+  Future<void> _showMembersDialog(
+      BuildContext context, List<dynamic> members) async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) return;
+
+    // 招待コードを取得
+    String? inviteCode;
+    try {
+      final invitationService = ref.read(invitationServiceProvider);
+      final invitation =
+          await invitationService.createInvitation(widget.groupId, userId);
+      inviteCode = invitation.inviteCode;
+    } catch (e) {
+      print('❌ Error creating invitation: $e');
+    }
+
+    if (!context.mounted) return;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('グループメンバー'),
         content: SizedBox(
           width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: members.length,
-            itemBuilder: (context, index) {
-              final member = members[index];
-              return ListTile(
-                leading: CircleAvatar(
-                  child: Text(
-                    member.username.isNotEmpty
-                        ? member.username[0].toUpperCase()
-                        : '?',
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // メンバーリスト
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: members.length,
+                  itemBuilder: (context, index) {
+                    final member = members[index];
+                    return ListTile(
+                      leading: CircleAvatar(
+                        child: Text(
+                          member.username.isNotEmpty
+                              ? member.username[0].toUpperCase()
+                              : '?',
+                        ),
+                      ),
+                      title: Text(member.username),
+                      subtitle:
+                          Text(member.role == 'owner' ? 'オーナー' : 'メンバー'),
+                      trailing: member.role == 'owner'
+                          ? const Icon(Icons.star, color: Colors.amber, size: 20)
+                          : null,
+                    );
+                  },
+                ),
+              ),
+              // 招待コードセクション
+              if (inviteCode != null) ...[
+                const Divider(height: 32),
+                const Text(
+                  '招待コード',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                title: Text(member.username),
-                subtitle: Text(member.role == 'owner' ? 'オーナー' : 'メンバー'),
-                trailing: member.role == 'owner'
-                    ? const Icon(Icons.star, color: Colors.amber, size: 20)
-                    : null,
-              );
-            },
+                const SizedBox(height: 8),
+                InviteCodeDisplay(
+                  inviteCode: inviteCode,
+                  padding: const EdgeInsets.all(12),
+                ),
+              ],
+            ],
           ),
         ),
         actions: [
@@ -294,6 +330,19 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen>
             onPressed: () => Navigator.pop(context),
             child: const Text('閉じる'),
           ),
+          if (inviteCode != null)
+            FilledButton.icon(
+              onPressed: () async {
+                final box = context.findRenderObject() as RenderBox?;
+                await Share.share(
+                  'コーヒーグループに参加しましょう！招待コード: $inviteCode!',
+                  sharePositionOrigin:
+                      box!.localToGlobal(Offset.zero) & box.size,
+                );
+              },
+              icon: const Icon(Icons.share),
+              label: const Text('共有'),
+            ),
         ],
       ),
     );
@@ -318,40 +367,7 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen>
               children: [
                 const Text('この招待コードを共有してください:'),
                 const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey[300]!, width: 1),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        invitation.inviteCode,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey[900],
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.copy, color: Colors.grey[700]),
-                        onPressed: () {
-                          Clipboard.setData(
-                            ClipboardData(text: invitation.inviteCode),
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('クリップボードにコピーしました'),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
+                InviteCodeDisplay(inviteCode: invitation.inviteCode),
               ],
             ),
             actions: [

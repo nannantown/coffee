@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../models/espresso_recipe.dart';
 import 'roast_level_label.dart';
+import 'creator_info_row.dart';
 
 class RecipeListItem extends ConsumerWidget {
   final EspressoRecipe recipe;
@@ -21,22 +22,10 @@ class RecipeListItem extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // User info
-              Row(
-                children: [
-                  Icon(Icons.person, size: 14, color: Colors.grey[600]),
-                  const SizedBox(width: 4),
-                  Flexible(
-                    child: Text(
-                      recipe.updatedByUsername,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
+              // Creator info
+              CreatorInfoRow(
+                avatarUrl: recipe.createdByAvatarUrl,
+                username: recipe.createdByUsername,
               ),
               const SizedBox(height: 8),
               // Roast level

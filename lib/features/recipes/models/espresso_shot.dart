@@ -3,6 +3,8 @@ class EspressoShot {
   final String groupId;
   final String createdBy;
   final String createdByUsername;
+  final String? createdByAvatarUrl;
+  final String? groupImageUrl;
   final double coffeeWeight;
   final String grinderSetting;
   final int? extractionTime;
@@ -19,6 +21,8 @@ class EspressoShot {
     required this.groupId,
     required this.createdBy,
     required this.createdByUsername,
+    this.createdByAvatarUrl,
+    this.groupImageUrl,
     required this.coffeeWeight,
     required this.grinderSetting,
     this.extractionTime,
@@ -37,6 +41,8 @@ class EspressoShot {
       groupId: json['group_id'] as String,
       createdBy: json['created_by'] as String,
       createdByUsername: json['created_by_username'] as String? ?? 'Unknown',
+      createdByAvatarUrl: json['created_by_avatar_url'] as String?,
+      groupImageUrl: json['group_image_url'] as String?,
       coffeeWeight: (json['coffee_weight'] as num).toDouble(),
       grinderSetting: json['grinder_setting'] as String,
       extractionTime: json['extraction_time'] as int?,
@@ -75,6 +81,8 @@ class EspressoShot {
     String? groupId,
     String? createdBy,
     String? createdByUsername,
+    String? createdByAvatarUrl,
+    String? groupImageUrl,
     double? coffeeWeight,
     String? grinderSetting,
     int? extractionTime,
@@ -91,6 +99,8 @@ class EspressoShot {
       groupId: groupId ?? this.groupId,
       createdBy: createdBy ?? this.createdBy,
       createdByUsername: createdByUsername ?? this.createdByUsername,
+      createdByAvatarUrl: createdByAvatarUrl ?? this.createdByAvatarUrl,
+      groupImageUrl: groupImageUrl ?? this.groupImageUrl,
       coffeeWeight: coffeeWeight ?? this.coffeeWeight,
       grinderSetting: grinderSetting ?? this.grinderSetting,
       extractionTime: extractionTime ?? this.extractionTime,
