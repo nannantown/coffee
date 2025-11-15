@@ -14,13 +14,14 @@ class GroupsListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.person),
+          onPressed: () => context.push('/profile'),
+          tooltip: 'プロフィール',
+        ),
         title: const Text('マイグループ'),
+        centerTitle: true,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () => context.push('/profile'),
-            tooltip: 'プロフィール',
-          ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: (value) async {
@@ -76,10 +77,7 @@ class GroupsListScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: groupsAsync.when(
+      body: groupsAsync.when(
               data: (groups) {
                 if (groups.isEmpty) {
                   return Center(
@@ -147,39 +145,22 @@ class GroupsListScreen extends ConsumerWidget {
                 ),
               ),
             ),
-          ),
-          _buildBottomActions(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBottomActions(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        border: Border(
-          top: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant,
-            width: 1,
-          ),
-        ),
-      ),
-      child: SafeArea(
-        top: false,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(left: 32),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            TextButton.icon(
+            FloatingActionButton.extended(
               onPressed: () => context.push('/groups/create'),
               icon: const Icon(Icons.add),
               label: const Text('グループを作成'),
+              heroTag: 'create_group',
             ),
-            TextButton.icon(
+            FloatingActionButton.extended(
               onPressed: () => context.push('/groups/join'),
               icon: const Icon(Icons.link),
               label: const Text('グループに参加'),
+              heroTag: 'join_group',
             ),
           ],
         ),
