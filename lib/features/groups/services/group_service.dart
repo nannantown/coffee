@@ -8,7 +8,7 @@ class GroupService {
   GroupService(this._supabase);
 
   // グループ作成
-  Future<CoffeeGroup> createGroup(String name, String userId) async {
+  Future<CoffeeGroup> createGroup(String name, String userId, {String? imageUrl}) async {
     try {
       final now = DateTime.now().toIso8601String();
 
@@ -18,6 +18,7 @@ class GroupService {
           .insert({
             'name': name,
             'owner_id': userId,
+            'image_url': imageUrl,
             'created_at': now,
             'updated_at': now,
           })
@@ -145,14 +146,33 @@ class GroupService {
           .update({'owner_id': newOwnerId, 'updated_at': DateTime.now().toIso8601String()})
           .eq('id', groupId);
 
-      // 新オーナーのroleを'owner'に更新
-      await _supabase
+      // 新オーナーをgroup_membersに追加（既に存在する場合はroleを更新）
+      final existingMember = await _supabase
           .from('group_members')
-          .update({'role': 'owner'})
+          .select()
           .eq('group_id', groupId)
-          .eq('user_id', newOwnerId);
+          .eq('user_id', newOwnerId)
+          .maybeSingle();
 
-      // 旧オーナーのroleを'member'に更新（後で削除される）
+      if (existingMember != null) {
+        // 既存メンバーのroleを'owner'に更新
+        await _supabase
+            .from('group_members')
+            .update({'role': 'owner'})
+            .eq('group_id', groupId)
+            .eq('user_id', newOwnerId);
+      } else {
+        // 新規メンバーとして'owner'で追加
+        await _supabase
+            .from('group_members')
+            .insert({
+              'group_id': groupId,
+              'user_id': newOwnerId,
+              'role': 'owner',
+            });
+      }
+
+      // 注: 旧オーナーは呼び出し元でleaveGroup()により削除される
       print('✅ Ownership transferred to: $newOwnerId');
     } catch (e) {
       print('❌ Error transferring ownership: $e');
@@ -197,6 +217,31 @@ class GroupService {
       print('✅ Group name updated: $newName');
     } catch (e) {
       print('❌ Error updating group name: $e');
+      rethrow;
+    }
+  }
+
+  // グループ画像を更新（メンバーなら誰でも可能）
+  Future<void> updateGroupImage(String groupId, String userId, String? imageUrl) async {
+    try {
+      // メンバーかチェック
+      final isMember = await isGroupMember(groupId, userId);
+      if (!isMember) {
+        throw Exception('Only group members can update the group image');
+      }
+
+      // グループ画像を更新
+      await _supabase
+          .from('coffee_groups')
+          .update({
+            'image_url': imageUrl,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', groupId);
+
+      print('✅ Group image updated');
+    } catch (e) {
+      print('❌ Error updating group image: $e');
       rethrow;
     }
   }

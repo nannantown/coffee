@@ -2,6 +2,7 @@ class CoffeeGroup {
   final String id;
   final String name;
   final String ownerId;
+  final String? imageUrl;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -9,6 +10,7 @@ class CoffeeGroup {
     required this.id,
     required this.name,
     required this.ownerId,
+    this.imageUrl,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -18,6 +20,7 @@ class CoffeeGroup {
       id: json['id'] as String,
       name: json['name'] as String,
       ownerId: json['owner_id'] as String,
+      imageUrl: json['image_url'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
@@ -28,6 +31,7 @@ class CoffeeGroup {
       'id': id,
       'name': name,
       'owner_id': ownerId,
+      'image_url': imageUrl,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
@@ -37,6 +41,7 @@ class CoffeeGroup {
     String? id,
     String? name,
     String? ownerId,
+    String? imageUrl,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -44,6 +49,7 @@ class CoffeeGroup {
       id: id ?? this.id,
       name: name ?? this.name,
       ownerId: ownerId ?? this.ownerId,
+      imageUrl: imageUrl ?? this.imageUrl,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

@@ -51,4 +51,19 @@ class ProfileService {
       rethrow;
     }
   }
+
+  // プロフィール画像を更新
+  Future<void> updateAvatar(String userId, String? avatarUrl) async {
+    try {
+      await _supabase.from('profiles').update({
+        'avatar_url': avatarUrl,
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('id', userId);
+
+      print('✅ Avatar updated');
+    } catch (e) {
+      print('❌ Error updating avatar: $e');
+      rethrow;
+    }
+  }
 }
